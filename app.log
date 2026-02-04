@@ -1,0 +1,108 @@
+{"level":"INFO","ts":"2026-01-27T11:42:26.754+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":31}
+{"level":"INFO","ts":"2026-01-27T11:42:27.119+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":41}
+{"level":"INFO","ts":"2026-01-27T11:42:27.119+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-01-27T11:42:56.414+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":31}
+{"level":"INFO","ts":"2026-01-27T11:42:56.759+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":41}
+{"level":"INFO","ts":"2026-01-27T11:42:56.759+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"WARN","ts":"2026-01-27T12:10:15.456+0800","msg":"密码错误","password":"10086","func":"login.Login","file":"E:/Documents/Github/a-easy-community/app/internal/service/login/login.go","line":48}
+{"level":"INFO","ts":"2026-01-27T12:11:49.601+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":31}
+{"level":"INFO","ts":"2026-01-27T12:11:50.009+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":41}
+{"level":"INFO","ts":"2026-01-27T12:11:50.010+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-01-27T12:14:57.832+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":33}
+{"level":"FATAL","ts":"2026-01-27T12:14:58.165+0800","msg":"数据库连接失败","error":"Error 1049 (42000): Unknown database 'user'","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":36}
+{"level":"INFO","ts":"2026-01-27T12:35:20.636+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":33}
+{"level":"INFO","ts":"2026-01-27T12:35:21.009+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-01-27T12:35:21.009+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-01-27T18:03:54.637+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":33}
+{"level":"INFO","ts":"2026-01-27T18:03:55.114+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-01-27T18:03:55.114+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-01-27T18:04:05.883+0800","msg":"用户创建失败","account":"1608431986","name":"最帅的拉屎","error":"Error 1062 (23000): Duplicate entry '1608431986' for key 'users.idx_users_account'","func":"login.Register","file":"E:/Documents/Github/a-easy-community/app/internal/service/login/login.go","line":29}
+{"level":"INFO","ts":"2026-01-31T13:32:44.272+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":33}
+{"level":"INFO","ts":"2026-01-31T13:32:44.983+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-01-31T13:32:44.983+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-03T17:14:54.588+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/internal/db/config/config.go","line":33}
+{"level":"INFO","ts":"2026-02-03T17:14:55.337+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-03T17:14:55.337+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"WARN","ts":"2026-02-03T17:28:38.923+0800","msg":"修改用户名不能为空","func":"login.ChangeName","file":"E:/Documents/Github/a-easy-community/app/internal/service/login/login.go","line":110}
+{"level":"WARN","ts":"2026-02-03T17:40:03.637+0800","msg":"用户未找到","func":"msq.Gorm.GetUser","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":22}
+{"level":"INFO","ts":"2026-02-03T20:37:33.847+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":34}
+{"level":"INFO","ts":"2026-02-03T20:37:34.343+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-03T20:37:34.343+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"WARN","ts":"2026-02-03T20:37:41.452+0800","msg":"用户未找到","func":"msq.Gorm.GetUser","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":22}
+{"level":"WARN","ts":"2026-02-03T20:37:41.452+0800","msg":"用户已存在","account":"123456","func":"login.Register","file":"E:/Documents/Github/a-easy-community/app/internal/service/login/login.go","line":28}
+{"level":"WARN","ts":"2026-02-03T20:40:41.107+0800","msg":"用户未找到","func":"msq.Gorm.GetUser","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":22}
+{"level":"WARN","ts":"2026-02-03T20:40:41.107+0800","msg":"用户已存在","account":"123456","func":"login.Register","file":"E:/Documents/Github/a-easy-community/app/internal/service/login/login.go","line":28}
+{"level":"INFO","ts":"2026-02-03T21:45:08.566+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":34}
+{"level":"INFO","ts":"2026-02-03T21:45:08.925+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-03T21:45:08.925+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"WARN","ts":"2026-02-03T21:45:13.251+0800","msg":"用户未找到","func":"msq.Gorm.GetUser","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":22}
+{"level":"INFO","ts":"2026-02-04T10:59:56.866+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T10:59:57.415+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T10:59:57.415+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-04T11:10:42.225+0800","msg":"无效token","error":"key is of invalid type","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T11:11:26.341+0800","msg":"无效token","error":"key is of invalid type","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T11:12:51.779+0800","msg":"无效token","error":"key is of invalid type","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T11:13:02.926+0800","msg":"无效token","error":"key is of invalid type","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-04T11:13:57.121+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:13:57.471+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:13:57.472+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-04T11:14:01.852+0800","msg":"无效token","error":"key is of invalid type","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-04T11:16:58.173+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:16:58.515+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:16:58.516+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"WARN","ts":"2026-02-04T11:19:33.213+0800","msg":"token拉入黑名单失败","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50IjoiMTIzNDU2Iiwicm9sZSI6MCwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTc3MDE3NTY1MSwiaXNzIjoiVG9tIiwibmJmIjoxNzcwMTc0NzQ2fQ._lRTFdGISrTgGAw86dy4ZA6y95JDaBmS_UfAi9mpsTU","func":"login.Logout","file":"E:/Documents/Github/a-easy-community/app/internal/service/login/login.go","line":84}
+{"level":"INFO","ts":"2026-02-04T11:22:36.001+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:22:36.343+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:22:36.343+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-04T11:22:48.342+0800","msg":"无效token","error":"signature is invalid","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T11:25:02.087+0800","msg":"无效token","error":"signature is invalid","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-04T11:32:28.051+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:32:28.396+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:32:28.397+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-04T11:32:35.360+0800","msg":"无效token","error":"signature is invalid","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T11:32:54.661+0800","msg":"无效token","error":"signature is invalid","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-04T11:34:41.237+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:34:41.583+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:34:41.583+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-04T11:34:51.169+0800","msg":"无效token","error":"signature is invalid","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-04T11:36:24.978+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:36:25.335+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:36:25.336+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-04T11:39:33.593+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T11:39:33.935+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T11:39:33.936+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-04T18:52:24.361+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T18:52:24.872+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T18:52:24.872+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-04T18:56:26.658+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T18:56:27.038+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T18:56:27.038+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-04T19:02:40.351+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T19:02:40.700+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T19:02:40.700+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"WARN","ts":"2026-02-04T19:03:49.269+0800","msg":"用户未找到","func":"msq.Gorm.GetUser","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":22}
+{"level":"ERROR","ts":"2026-02-04T19:04:17.488+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:04:57.878+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:04:59.372+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:05:19.045+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:08:03.229+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:08:03.846+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:09:25.942+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:09:40.944+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-04T19:10:33.362+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T19:10:33.714+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T19:10:33.714+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-04T19:10:46.857+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:10:50.559+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:10:56.981+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-04T19:11:01.018+0800","msg":"无效token","error":"token contains an invalid number of segments","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"WARN","ts":"2026-02-04T19:11:35.571+0800","msg":"请求出错了","func":"api.ChangeAvatar","file":"E:/Documents/Github/a-easy-community/app/internal/api/api.go","line":196}
+{"level":"INFO","ts":"2026-02-04T19:17:20.109+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T19:17:20.457+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T19:17:20.457+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-04T19:21:19.173+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T19:21:19.520+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T19:21:19.520+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-04T19:22:14.510+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-04T19:22:14.856+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-04T19:22:14.856+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}

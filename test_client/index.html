@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试控制台</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 { color: var(--primary-color); }
+        .config-bar {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            transition: opacity 0.3s;
+        }
+        button:hover { opacity: 0.9; }
+        button.danger { background-color: var(--error-color); }
+        button.success { background-color: var(--success-color); }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .response-area {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .hidden { display: none; }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: #eee;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        .token-display {
+            word-break: break-all;
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="config-bar">
+        <label>API 基础地址:</label>
+        <input type="text" id="baseUrl" value="http://localhost:8080" style="width: 250px; margin-bottom: 0;">
+        <span id="authStatus" class="badge">未登录</span>
+    </div>
+
+    <div class="grid-container">
+        <!-- 左侧：操作表单 -->
+        <div class="left-panel">
+            
+            <!-- 注册/登录 -->
+            <div id="authSection" class="card">
+                <h2>👤 认证</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <button onclick="showTab('login')" id="btnLoginTab">登录</button>
+                    <button onclick="showTab('register')" id="btnRegisterTab" style="background-color: #ddd; color: #333;">注册</button>
+                </div>
+
+                <!-- 登录表单 -->
+                <div id="loginForm">
+                    <input type="text" id="loginAccount" placeholder="账号">
+                    <input type="password" id="loginPassword" placeholder="密码">
+                    <button onclick="login()" class="success">登录</button>
+                </div>
+
+                <!-- 注册表单 -->
+                <div id="registerForm" class="hidden">
+                    <input type="text" id="regAccount" placeholder="账号">
+                    <input type="text" id="regName" placeholder="昵称">
+                    <input type="password" id="regPassword" placeholder="密码">
+                    <button onclick="register()">注册</button>
+                </div>
+            </div>
+
+            <!-- 用户功能 (登录后显示) -->
+            <div id="userSection" class="hidden">
+                <div class="card">
+                    <h2>📋 个人信息 <button onclick="getProfile()" style="float: right; padding: 5px 10px; font-size: 12px;">刷新</button></h2>
+                    <div id="profileView">
+                        <p>请点击刷新获取数据...</p>
+                    </div>
+                    <div class="token-display" id="tokenDisplay"></div>
+                    <div style="margin-top: 10px;">
+                        <button onclick="logout()" class="danger">退出登录</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>✏️ 修改资料</h2>
+                    
+                    <h3>修改用户昵称</h3>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="newName" placeholder="新昵称">
+                        <button onclick="changeName()">修改</button>
+                    </div>
+
+                    <h3>修改个性签名 (Introduction)</h3>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="newIntro" placeholder="新签名">
+                        <button onclick="changeIntro()">修改</button>
+                    </div>
+                    
+                    <h3>修改头像 (上传文件)</h3>
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <input type="file" id="newAvatarFile" accept="image/*">
+                        <button onclick="changeAvatar()">上传</button>
+                    </div>
+
+                    <h3>修改密码</h3>
+                    <input type="password" id="oldPass" placeholder="旧密码 (API似乎没用到旧密码校验?)" disabled style="background-color: #eee;">
+                    <input type="password" id="newPass1" placeholder="新密码">
+                    <input type="password" id="newPass2" placeholder="确认新密码">
+                    <button onclick="changePassword()" class="danger">重置密码</button>
+                </div>
+
+                <div class="card">
+                    <h2>⚠️ 危险操作</h2>
+                    <button onclick="deleteUser()" class="danger">注销账号 (Delete User)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：日志输出 -->
+        <div class="right-panel">
+            <div class="card">
+                <h2>📡 请求日志</h2>
+                <div style="margin-bottom: 10px;">
+                    <button onclick="clearLog()" style="background-color: #666; font-size: 12px; padding: 5px 10px;">清空日志</button>
+                </div>
+                <div id="logArea" class="response-area">暂无请求...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 移除全局 token 变量，改为每次请求动态获取
+        // let token = localStorage.getItem('token') || '';
+
+        // 初始化
+        const initToken = localStorage.getItem('token');
+        if (initToken) {
+            updateAuthStatus(true);
+            document.getElementById('tokenDisplay').innerText = "Token: " + initToken;
+            // 自动拉取一次用户信息
+            setTimeout(getProfile, 500);
+        }
+
+        function getBaseUrl() {
+            return document.getElementById('baseUrl').value.replace(/\/$/, '');
+        }
+
+        function log(title, data, isError = false) {
+            const logArea = document.getElementById('logArea');
+            const time = new Date().toLocaleTimeString();
+            const color = isError ? '#ff6b6b' : '#69f0ae';
+            const content = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+            
+            const entry = `\n[${time}] ${title}\n${content}\n----------------------------------------`;
+            logArea.innerText = entry + logArea.innerText;
+        }
+
+        function clearLog() {
+            document.getElementById('logArea').innerText = '';
+        }
+
+        function updateAuthStatus(isLoggedIn) {
+            const badge = document.getElementById('authStatus');
+            const userSection = document.getElementById('userSection');
+            const authSection = document.getElementById('authSection');
+
+            if (isLoggedIn) {
+                badge.innerText = "已登录";
+                badge.style.backgroundColor = "#4caf50";
+                badge.style.color = "white";
+                userSection.classList.remove('hidden');
+                authSection.classList.add('hidden');
+            } else {
+                badge.innerText = "未登录";
+                badge.style.backgroundColor = "#eee";
+                badge.style.color = "#333";
+                userSection.classList.add('hidden');
+                authSection.classList.remove('hidden');
+                document.getElementById('tokenDisplay').innerText = "";
+            }
+        }
+
+        function showTab(tab) {
+            if(tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('btnLoginTab').style.backgroundColor = 'var(--primary-color)';
+                document.getElementById('btnLoginTab').style.color = 'white';
+                document.getElementById('btnRegisterTab').style.backgroundColor = '#ddd';
+                document.getElementById('btnRegisterTab').style.color = '#333';
+            } else {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+                document.getElementById('btnRegisterTab').style.backgroundColor = 'var(--primary-color)';
+                document.getElementById('btnRegisterTab').style.color = 'white';
+                document.getElementById('btnLoginTab').style.backgroundColor = '#ddd';
+                document.getElementById('btnLoginTab').style.color = '#333';
+            }
+        }
+
+        async function request(endpoint, method = 'GET', data = null) {
+            const url = getBaseUrl() + endpoint;
+            const headers = {
+                // 'Content-Type': 'application/json' // 默认值，下面逻辑会调整
+            };
+            
+            // 每次请求都从 LocalStorage 获取最新 Token
+            const currentToken = localStorage.getItem('token');
+            if (currentToken) {
+                headers['Authorization'] = 'Bearer ' + currentToken;
+            }
+
+            const options = {
+                method,
+                headers,
+                credentials: 'include', // 允许发送和接收 Cookie (用于 Refresh Token)
+            };
+
+            if (data instanceof FormData) {
+                // 如果是 FormData，不要手动设置 Content-Type，浏览器会自动处理边界(boundary)
+                options.body = data;
+            } else {
+                // 默认 JSON 格式
+                headers['Content-Type'] = 'application/json';
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+            }
+
+            log(`>>> ${method} ${endpoint}`, data instanceof FormData ? '[FormData File]' : (data || '(no body)'));
+
+            try {
+                const res = await fetch(url, options);
+                const resData = await res.json();
+                
+                if (res.ok) {
+                    log(`<<< ${res.status} OK`, resData);
+                    return resData;
+                } else {
+                    log(`<<< ${res.status} Error`, resData, true);
+                    alert("操作失败: " + (resData.msg || "未知错误"));
+                    return null;
+                }
+            } catch (error) {
+                log(`<<< Network Error`, error, true);
+                alert("网络错误，请检查后端是否启动");
+                return null;
+            }
+        }
+
+        // ================= 业务逻辑 =================
+
+        async function register() {
+            const account = document.getElementById('regAccount').value;
+            const name = document.getElementById('regName').value;
+            const password = document.getElementById('regPassword').value;
+
+            if(!account || !password || !name) return alert("请填写完整");
+
+            const res = await request('/account/register', 'POST', { account, name, password });
+            if (res && res.code === 0) { // 假设 0 是成功
+                alert("注册成功，请登录");
+                showTab('login');
+                document.getElementById('loginAccount').value = account;
+            }
+        }
+
+        async function login() {
+            const account = document.getElementById('loginAccount').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if(!account || !password) return alert("请填写完整");
+
+            const res = await request('/account/login', 'POST', { account, password });
+            if (res && res.code === 0) {
+                // 确保正确提取 Token，因为不同后端可能返回结构不同 (string vs object)
+                let finalToken = "";
+                if (typeof res.data === 'string') {
+                    finalToken = res.data;
+                } else if (res.data && res.data.token) {
+                    finalToken = res.data.token;
+                } else {
+                    console.warn("登录返回的 Data 结构不符合预期:", res.data);
+                    // 尝试作为字符串兜底
+                    finalToken = String(res.data);
+                }
+
+                if(finalToken) {
+                    localStorage.setItem('token', finalToken);
+                    updateAuthStatus(true);
+                    document.getElementById('tokenDisplay').innerText = "Token: " + finalToken;
+                    getProfile();
+                } else {
+                    alert("登录失败: 无法获取 Token");
+                }
+            }
+        }
+
+        function logout() {
+            // 调用后端登出（如果需要）
+            request('/account/protected/logout', 'POST'); 
+            localStorage.removeItem('token');
+            updateAuthStatus(false);
+            alert("已退出");
+        }
+
+        async function getProfile() {
+            const res = await request('/account/protected/profile', 'GET');
+            if (res && res.code === 0) {
+                const user = res.data;
+                
+                // 处理头像 URL: 如果是相对路径，拼接上 BaseURL
+                let avatarSrc = user.Avatar;
+                if (avatarSrc && !avatarSrc.startsWith('http')) {
+                   avatarSrc = getBaseUrl() + avatarSrc;
+                }
+                // 如果没有头像，使用默认占位图
+                if (!avatarSrc) {
+                    avatarSrc = 'https://via.placeholder.com/150?text=No+Avatar';
+                }
+
+                const html = `
+                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                        <div style="flex-shrink: 0;">
+                            <img src="${avatarSrc}" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <p style="margin: 0 0 5px 0;"><strong>账号:</strong> ${user.Account} <span class="badge" style="background:${user.Role === 1 ? '#ff9800' : '#2196f3'};color:white;">${user.Role === 1 ? '管理员' : '普通用户'}</span></p>
+                            <p style="margin: 5px 0;"><strong>昵称:</strong> ${user.Name}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 0.9em;"><strong>简介:</strong> ${user.Introduction || '这个人很懒，什么都没写'}</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('profileView').innerHTML = html;
+            }
+        }
+
+        async function changeName() {
+            const name = document.getElementById('newName').value;
+            if(!name) return;
+            const res = await request('/account/protected/username', 'PATCH', { name });
+            if(res && res.code === 0) {
+                alert("修改成功");
+                getProfile();
+            }
+        }
+
+        async function changeIntro() {
+            const introduction = document.getElementById('newIntro').value;
+            if(!introduction) return;
+            const res = await request('/account/protected/introduction', 'PATCH', { introduction });
+            if(res && res.code === 0) {
+                alert("修改成功");
+                getProfile();
+            }
+        }
+        
+        async function changeAvatar() {
+            const fileInput = document.getElementById('newAvatarFile');
+            if(fileInput.files.length === 0) return alert("请选择要上传的图片文件");
+
+            // 构建 FormData
+            const formData = new FormData();
+            formData.append('avatar', fileInput.files[0]); // 后端 api.go 中使用的是 c.FormFile("avatar")
+
+            const res = await request('/account/protected/avatar', 'POST', formData);
+            if(res && res.code === 0) {
+                alert("头像修改成功");
+                getProfile();
+            }
+        }
+
+        async function changePassword() {
+            const pw1 = document.getElementById('newPass1').value;
+            const pw2 = document.getElementById('newPass2').value;
+            
+            if(!pw1 || !pw2) return alert("请输入新密码");
+            if(pw1 !== pw2) return alert("两次验证密码不一致");
+
+            // 注意：这里按照我们之前讨论的 UserPassword 结构体来传参
+            // json tag 是 first_password 和 second_password
+            const res = await request('/account/protected/password-change', 'POST', {
+                first_password: pw1,
+                second_password: pw2
+            });
+            
+            if(res && res.code === 0) {
+                alert("密码修改成功");
+            }
+        }
+
+        async function deleteUser() {
+            if(!confirm("确定要注销账号吗？此操作不可恢复！")) return;
+            const res = await request('/account/protected/delete-user', 'DELETE');
+            if(res && res.code === 0) {
+                alert("账号已注销");
+                logout();
+            }
+        }
+
+    </script>
+</body>
+</html>
