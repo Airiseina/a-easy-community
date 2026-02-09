@@ -34,6 +34,22 @@ func Routes() {
 		protected.DELETE("/delete-user", api.DeleteUser)
 		//	退出登录
 		protected.POST("/logout", api.Logout)
+		//发布文章
+		protected.POST("/posts", api.CreatePost)
+		//论坛主页
+		protected.GET("/posts", api.GetPostList)
+		//文章主页
+		protected.GET("/posts/:postId", api.GetPostDetail)
+		//发表评论
+		protected.POST("/posts/:postId", api.CreateComment)
+		//查找作者主页
+		protected.GET("/users/:Id", api.GetUserProfile)
+		//删除文章
+		protected.DELETE("/posts/:postId", api.DeletePost)
+		//删除评论
+		protected.DELETE("/posts/:postId/:posterId/:commentId", api.DeleteComment)
+		//禁言
+		protected.POST("/muted/:Id", api.Muted)
 	}
 	r.Run(":8080")
 }

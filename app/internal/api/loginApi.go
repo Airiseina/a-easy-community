@@ -7,8 +7,9 @@ import (
 	"commmunity/app/utils"
 	"commmunity/app/zlog"
 	"fmt"
-	"net/http"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -39,7 +40,6 @@ func Register(c *gin.Context) {
 	response.Ok(c)
 }
 
-// 增加refresh token
 func Login(c *gin.Context) {
 	var user model.UserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -84,24 +84,12 @@ func Login(c *gin.Context) {
 
 func GetProfile(c *gin.Context) {
 	account := c.GetString("account")
-	info, err, flag1 := login.GetProfile(account)
+	info, err := login.GetProfile(account)
 	if err != nil {
 		response.Fail(c)
 		return
 	}
-	if flag1 == false {
-		response.FailWithCode(c, response.ERROR_USER_NOT_EXIST_OR_PASSWORD_WRONG, response.GetMsg(response.ERROR_USER_NOT_EXIST_OR_PASSWORD_WRONG))
-		return
-	}
-	userInfo := map[string]interface{}{
-		"Account":      (*info).Account,
-		"Name":         (*info).Name,
-		"Introduction": (*info).Introduction,
-		"Avatar":       (*info).Avatar,
-		"Role":         (*info).Role,
-		"IsMuted":      (*info).IsMuted,
-	}
-	response.OkWithData(c, userInfo)
+	response.OkWithData(c, info)
 }
 
 func Logout(c *gin.Context) {
@@ -190,6 +178,7 @@ func ChangeUserName(c *gin.Context) {
 	response.Ok(c)
 }
 
+// 将储存如硬盘的步骤移到serve层
 func ChangeAvatar(c *gin.Context) {
 	file, err := c.FormFile("avatar")
 	if err != nil {
@@ -200,6 +189,12 @@ func ChangeAvatar(c *gin.Context) {
 	ext := filepath.Ext(file.Filename)
 	account := c.GetString("account")
 	newFileName := fmt.Sprintf("%s_%d%s", account, time.Now().Unix(), ext)
+	err = os.MkdirAll("./uploads/avatars", 0755)
+	if err != nil {
+		zlog.Error("文件夹创建失败", zap.Error(err))
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
 	savePath := filepath.Join("uploads", "avatars", newFileName)
 	if err := c.SaveUploadedFile(file, savePath); err != nil {
 		zlog.Error("服务器硬盘出错", zap.Error(err))
@@ -231,6 +226,31 @@ func ChangeIntroduction(c *gin.Context) {
 	response.Ok(c)
 }
 
+func Muted(c *gin.Context) {
+	var user model.UserInfoRequest
+	if err := c.ShouldBindJSON(&user); err != nil {
+		zlog.Warn("请求出错了")
+		response.FailWithCode(c, response.INVALID_PARAMS, response.GetMsg(response.INVALID_PARAMS))
+		return
+	}
+	role := c.MustGet("role").(int)
+	i, err := strconv.ParseUint(c.Param("Id"), 10, 64)
+	if err != nil {
+		zlog.Error("转换失败")
+		response.Fail(c)
+	}
+	id := uint(i)
+	err, flag := login.Muted(id, role, user.IsMuted)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if flag == false {
+		response.FailWithMessage(c, "权限不够")
+		return
+	}
+	response.Ok(c)
+}
 func RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
@@ -250,54 +270,4 @@ func RefreshToken(c *gin.Context) {
 	newAccessToken, _, err := utils.MakeToken(claims.Account, claims.Role)
 	// 5. (可选) 甚至可以把 Refresh Token 也顺便换个新的 (Token Rotation 策略)
 	response.OkWithData(c, gin.H{"access_token": newAccessToken})
-}
-
-func UploadAvatar(c *gin.Context) {
-	// 1. 找文件
-	// "avatar" 是我们和前端约好的暗号。前端传文件时，字段名必须叫 avatar。
-	file, err := c.FormFile("avatar")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "大哥，你没传图片啊！"})
-		return
-	}
-
-	// 2. 也是为了安全：重命名文件
-	// 为什么？如果两个用户都上传了 "me.jpg"，后传的会把先传的覆盖掉！
-	// 所以我们要把文件名改成唯一的。
-	// 策略：用户ID + 当前时间戳 + 原来的后缀名
-
-	// 获取文件后缀，比如 ".jpg" 或 ".png"
-	ext := filepath.Ext(file.Filename)
-
-	// 假设从中间件拿到了当前用户ID (c.Get("userID"))，这里先假设是 10086
-	userID := 10086
-
-	// 生成新名字：10086_1762345678.jpg
-	newFileName := fmt.Sprintf("%d_%d%s", userID, time.Now().Unix(), ext)
-
-	// 3. 拼凑保存路径
-	// 告诉 Go：存到当前目录下的 uploads/avatars 文件夹里
-	savePath := filepath.Join("uploads", "avatars", newFileName)
-
-	// 4. 执行保存动作 (存硬盘)
-	// 这一步才是真正把二进制流写进硬盘
-	if err := c.SaveUploadedFile(file, savePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "服务器硬盘坏了，存不进去"})
-		return
-	}
-
-	// 5. 生成访问链接 (存数据库用)
-	// 这一步很重要！我们不能把硬盘路径 "uploads/avatars/..." 告���前端。
-	// 我们要给一个 URL，比如 "/static/avatars/..."
-	// 为什么是 /static？这是我们下一步要配置的“传送门”。
-	accessURL := "/static/avatars/" + newFileName
-
-	// 6. 更新数据库 (这里写伪代码)
-	// database.UpdateUserAvatar(userID, accessURL)
-
-	// 7. 告诉前端成功了，顺便把新头像地址给他
-	c.JSON(http.StatusOK, gin.H{
-		"msg": "上传成功",
-		"url": accessURL,
-	})
 }

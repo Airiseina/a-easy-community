@@ -35,7 +35,7 @@ func ConnectMysql() *gorm.DB {
 	if err != nil {
 		zlog.Fatal("数据库连接失败", zap.Error(err))
 	}
-	err = db.AutoMigrate(&model.User{})
+	err = db.AutoMigrate(&model.User{}, &model.UserProfile{}, &model.Post{}, &model.Comment{})
 	if err != nil {
 		zlog.Fatal("自动迁移失败", zap.Error(err))
 	}

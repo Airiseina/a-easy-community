@@ -37,6 +37,7 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		c.Set("account", (*claims).Account)
+		c.Set("role", (*claims).Role)
 		c.Next()
 	}
 }

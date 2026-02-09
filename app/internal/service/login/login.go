@@ -20,17 +20,12 @@ func Register(account string, password string, name string) (error, bool, bool) 
 		zlog.Error("密码哈希失败", zap.String("password", password), zap.Error(err))
 		return err, false, false
 	}
-	user := model.User{
-		Account: account,
-		Hash:    string(hash),
-		Name:    name,
-	}
 	users, err := global.User.GetUser(account)
 	if users != nil || err != nil {
 		zlog.Warn("用户已存在", zap.String("account", account))
 		return nil, true, false
 	}
-	err = global.User.CreateUser(user)
+	err = global.User.CreateUser(account, string(hash), name)
 	if err != nil {
 		zlog.Error("用户创建失败", zap.String("account", account), zap.String("name", name), zap.Error(err))
 		return err, false, false
@@ -59,15 +54,48 @@ func Login(account string, password string) (error, bool, bool) { //第一个boo
 	return nil, true, true
 }
 
-func GetProfile(account string) (*model.User, error, bool) {
-	user, err := global.User.GetUser(account)
+type UserProfileDTO struct {
+	Account      string        `json:"account"`
+	Name         string        `json:"name"`
+	Introduction string        `json:"introduction"`
+	Avatar       string        `json:"avatar"`
+	Role         int           `json:"role"`
+	IsMuted      bool          `json:"isMuted"`
+	Posts        []UserPostDTO `json:"posts"`
+}
+type UserPostDTO struct {
+	PostID       uint   `json:"post_id"`
+	Title        string `json:"title"`
+	ViewCount    uint   `json:"view_count"`
+	LikeCount    uint   `json:"like_count"`
+	CommentCount uint   `json:"comment_count"`
+}
+
+func GetProfile(account string) (UserProfileDTO, error) {
+	user, err := global.User.GetProfile(account)
 	if err != nil {
-		return nil, err, false
+		return UserProfileDTO{}, err
 	}
-	if user == nil {
-		return nil, nil, false
+	userPostDTO := make([]UserPostDTO, 0, len(user.Posts))
+	for _, post := range user.Posts {
+		userPostDTO = append(userPostDTO, UserPostDTO{
+			PostID:       post.ID,
+			Title:        post.Title,
+			ViewCount:    post.ViewCount,
+			LikeCount:    post.LikeCount,
+			CommentCount: post.CommentCount,
+		})
 	}
-	return user, nil, true
+	userProfile := UserProfileDTO{
+		Account:      user.Account,
+		Name:         user.UserProfile.Name,
+		Introduction: user.UserProfile.Introduction,
+		Avatar:       user.UserProfile.Avatar,
+		Role:         user.Role,
+		IsMuted:      user.UserProfile.IsMuted,
+		Posts:        userPostDTO,
+	}
+	return userProfile, nil
 }
 
 func Logout(token string, refreshToken string) error {
@@ -105,9 +133,10 @@ func Logout(token string, refreshToken string) error {
 func DeleteUser(account string) error {
 	err := global.User.DeleteUser(account)
 	if err != nil {
+		zlog.Error("用户删除失败", zap.String("account", account))
 		return err
 	}
-	return nil
+	return global.User.DeleteUser(account)
 }
 
 // 短时间内应只修改一次，旧密码验证,改密踢人
@@ -124,11 +153,7 @@ func ChangePassword(account string, firstPassword string, secondPassword string)
 		zlog.Error("修改密码哈希失败", zap.Error(err))
 		return err, false, false
 	}
-	user := model.User{
-		Account: account,
-		Hash:    string(hash),
-	}
-	err = global.User.ChangePassword(user)
+	err = global.User.ChangePassword(account, string(hash))
 	if err != nil {
 		return err, false, false
 	}
@@ -142,11 +167,7 @@ func ChangeName(account string, newName string) (error, bool) {
 		zlog.Warn("修改用户名不能为空")
 		return nil, false
 	}
-	user := model.User{
-		Account: account,
-		Name:    newName,
-	}
-	err := global.User.ChangeUserName(user)
+	err := global.User.ChangeUserName(account, newName)
 	if err != nil {
 		return err, false
 	}
@@ -154,27 +175,11 @@ func ChangeName(account string, newName string) (error, bool) {
 }
 
 func ChangeAvatar(account string, avatar string) error {
-	user := model.User{
-		Account: account,
-		Avatar:  avatar,
-	}
-	err := global.User.ChangeAvatar(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.User.ChangeAvatar(account, avatar)
 }
 
 func ChangeIntroduction(account string, introduction string) error {
-	user := model.User{
-		Account:      account,
-		Introduction: introduction,
-	}
-	err := global.User.ChangeIntroduction(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.User.ChangeIntroduction(account, introduction)
 }
 
 func GetUserRole(account string) (int, error) {
@@ -191,4 +196,15 @@ func IsTokenValid(tokenStr string) bool {
 		return false
 	}
 	return true
+}
+
+func Muted(userId uint, role int, isMuted bool) (error, bool) {
+	if role == model.RoleAdmin {
+		err := global.User.Muted(userId, isMuted)
+		if err != nil {
+			return err, false
+		}
+		return nil, true
+	}
+	return nil, false
 }
