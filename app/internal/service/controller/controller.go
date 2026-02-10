@@ -3,6 +3,7 @@ package controller
 import (
 	"commmunity/app/internal/db/global"
 	"commmunity/app/internal/model"
+	"fmt"
 )
 
 func CreatePost(account string, title string, content string) (error, bool) {
@@ -186,4 +187,9 @@ func DeleteComment(account string, commentID uint, role int) (error, bool) {
 		return nil, true
 	}
 	return nil, false
+}
+
+func ToggleLike(postId uint, userId uint) (bool, int, error) {
+	key := fmt.Sprintf("post:likes:%d", postId)
+
 }

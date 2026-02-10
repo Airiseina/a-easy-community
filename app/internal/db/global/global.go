@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	User  msq.UserData  = msq.NewGorm(msq.ConnectMysql())
-	Redis red.UserRedis = red.NewRedis(red.ConnectRedis())
-	Post  msq.PostData  = msq.NewGorm(msq.ConnectMysql())
+	User      msq.UserData  = msq.NewGorm(msq.ConnectMysql())
+	UserRedis red.UserRedis = red.NewRedis(red.ConnectRedis())
+	Post      msq.PostData  = msq.NewGorm(msq.ConnectMysql())
+	PostRedis red.PostRedis = red.NewRedis(red.ConnectRedis())
 )

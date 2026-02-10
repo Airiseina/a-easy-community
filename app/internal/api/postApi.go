@@ -5,9 +5,14 @@ import (
 	"commmunity/app/internal/response"
 	"commmunity/app/internal/service/controller"
 	"commmunity/app/zlog"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 func CreatePost(c *gin.Context) {
@@ -28,6 +33,36 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 	response.Ok(c)
+}
+
+func UploadImage(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		zlog.Warn("请求出错了")
+		response.FailWithCode(c, response.INVALID_PARAMS, response.GetMsg(response.INVALID_PARAMS))
+		return
+	}
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".jpg" && ext != ".png" && ext != ".gif" && ext != ".jpeg" {
+		zlog.Warn("插入图片格式不对")
+		response.FailWithMessage(c, "请插入正确的图片")
+		return
+	}
+	fileName := uuid.New().String() + ext
+	err = os.MkdirAll("./uploads/post_file", 0755)
+	if err != nil {
+		zlog.Error("文件夹创建失败", zap.Error(err))
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	savePath := filepath.Join("uploads", "post_file", fileName)
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		zlog.Error("服务器硬盘出错", zap.Error(err))
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	url := "http://localhost:8080/static/post_file/" + fileName
+	response.OkWithData(c, gin.H{"url": url})
 }
 
 func GetPostList(c *gin.Context) {

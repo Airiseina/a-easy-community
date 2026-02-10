@@ -246,6 +246,41 @@
             display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #ffc107;
         }
         .config-bar input { width: 200px; margin-bottom: 0; font-size: 12px; padding: 4px 8px; }
+
+        /* 图片上传 */
+        .upload-toolbar {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+        }
+        .upload-toolbar label {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 4px;
+            font-size: 13px; cursor: pointer; color: #555; background: #fafafa;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .upload-toolbar label:hover { border-color: var(--primary-color); background: #f0f5ff; color: var(--primary-color); }
+        .upload-toolbar .upload-status { font-size: 12px; color: var(--text-secondary); }
+        .image-preview-area {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+        }
+        .image-preview-area .preview-item {
+            position: relative; width: 80px; height: 80px; border-radius: 6px;
+            overflow: hidden; border: 1px solid var(--border-color);
+        }
+        .image-preview-area .preview-item img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .image-preview-area .preview-item .remove-btn {
+            position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+            border-radius: 50%; background: rgba(0,0,0,0.6); color: white;
+            font-size: 12px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 0; border: none; line-height: 1;
+        }
+        .image-preview-area .preview-item .remove-btn:hover { background: var(--error-color); }
+        /* 帖子/评论内容中的图片 */
+        .rich-content img {
+            max-width: 100%; border-radius: 6px; margin: 8px 0; cursor: pointer;
+        }
+        .rich-content img:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -321,8 +356,16 @@
                     <input type="text" id="postTitle" placeholder="标题">
                 </div>
                 <div class="form-group" style="margin-bottom: 12px;">
-                    <textarea id="postContent" rows="10" placeholder="正文内容 (支持纯文本)"></textarea>
+                    <textarea id="postContent" rows="10" placeholder="正文内容 (支持插入图片)"></textarea>
                 </div>
+                <div class="upload-toolbar">
+                    <label>
+                        🖼️ 插入图片
+                        <input type="file" accept="image/jpg,image/jpeg,image/png,image/gif" style="display:none;" onchange="doUploadImage(this, 'post')">
+                    </label>
+                    <span class="upload-status" id="postUploadStatus"></span>
+                </div>
+                <div class="image-preview-area" id="postImagePreview"></div>
                 <div style="display: flex; gap: 10px;">
                     <button onclick="doCreatePost()" class="success">发布</button>
                     <button onclick="navigateTo('feed')" class="ghost">取消</button>
@@ -340,6 +383,14 @@
                     <h3>💬 评论</h3>
                     <div class="comment-input-area" id="commentInputArea">
                         <textarea id="commentContent" rows="3" placeholder="写下你的评论..."></textarea>
+                        <div class="upload-toolbar">
+                            <label>
+                                🖼️ 插入图片
+                                <input type="file" accept="image/jpg,image/jpeg,image/png,image/gif" style="display:none;" onchange="doUploadImage(this, 'comment')">
+                            </label>
+                            <span class="upload-status" id="commentUploadStatus"></span>
+                        </div>
+                        <div class="image-preview-area" id="commentImagePreview"></div>
                         <div><button onclick="doCreateComment()" class="small">发表评论</button></div>
                     </div>
                     <div id="commentList"></div>
@@ -457,6 +508,82 @@
             const div = document.createElement('div');
             div.textContent = text || '';
             return div.innerHTML;
+        }
+
+        // 渲染富文本内容（支持 ![img](url) 图片语法）
+        function renderRichContent(text) {
+            if (!text) return '';
+            let html = escapeHtml(text);
+            // 将 ![img](url) 转换为 <img> 标签
+            html = html.replace(/!\[img\]\((.*?)\)/g, '<img src="$1" alt="图片" onclick="window.open(this.src)">');
+            return html;
+        }
+
+        // 上传图片到服务器，插入到光标位置
+        async function doUploadImage(inputEl, target) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById(target + 'UploadStatus');
+            const textareaId = target === 'post' ? 'postContent' : 'commentContent';
+            const textarea = document.getElementById(textareaId);
+            statusEl.textContent = '⏳ 上传中...';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await request('/account/protected/upload', 'POST', formData);
+
+            inputEl.value = ''; // 清空 file input 以便重复选择同一文件
+            if (res && res.data && res.data.url) {
+                const url = res.data.url;
+                // 在光标位置插入图片标记
+                insertAtCursor(textarea, `![img](${url})`);
+                // 更新预览
+                renderImagePreviewFromText(target);
+                statusEl.textContent = '✅ 已插入';
+                setTimeout(() => { statusEl.textContent = ''; }, 2000);
+            } else {
+                statusEl.textContent = '❌ 上传失败';
+                setTimeout(() => { statusEl.textContent = ''; }, 3000);
+            }
+        }
+
+        // 在 textarea 光标位置插入文本
+        function insertAtCursor(textarea, text) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = textarea.value.substring(0, start);
+            const after = textarea.value.substring(end);
+            // 如果光标前不是换行或开头，先加一个换行
+            const prefix = (before.length > 0 && !before.endsWith('\n')) ? '\n' : '';
+            // 插入后也加一个换行，方便继续输入
+            const suffix = (after.length > 0 && !after.startsWith('\n')) ? '\n' : '';
+            textarea.value = before + prefix + text + suffix + after;
+            // 移动光标到插入内容之后
+            const newPos = before.length + prefix.length + text.length + suffix.length;
+            textarea.selectionStart = textarea.selectionEnd = newPos;
+            textarea.focus();
+        }
+
+        // 从 textarea 内容解析图片 URL 并渲染预览
+        function renderImagePreviewFromText(target) {
+            const textareaId = target === 'post' ? 'postContent' : 'commentContent';
+            const content = document.getElementById(textareaId).value;
+            const container = document.getElementById(target + 'ImagePreview');
+            const regex = /!\[img\]\((.*?)\)/g;
+            const images = [];
+            let match;
+            while ((match = regex.exec(content)) !== null) {
+                images.push(match[1]);
+            }
+            if (images.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = images.map(url => `
+                <div class="preview-item">
+                    <img src="${url}" alt="预览">
+                </div>
+            `).join('');
         }
 
         // ===================== Toast =====================
@@ -702,6 +829,7 @@
                 showToast('发布成功', 'success');
                 document.getElementById('postTitle').value = '';
                 document.getElementById('postContent').value = '';
+                document.getElementById('postImagePreview').innerHTML = '';
                 navigateTo('feed');
             }
         }
@@ -737,7 +865,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="post-content">${escapeHtml(p.content)}</div>
+                <div class="post-content rich-content">${renderRichContent(p.content)}</div>
                 <div class="post-actions">
                     <button class="small ghost" onclick="navigateTo('feed')">← 返回列表</button>
                     ${canDelete ? `<button class="small ghost-danger" onclick="doDeletePost(${p.post_id})">🗑 删除帖子</button>` : ''}
@@ -754,7 +882,7 @@
                         <img src="${resolveAvatar(c.user_avatar)}" onclick="navigateTo('user-profile', ${c.user_id})">
                         <div class="comment-body">
                             <div class="comment-author" onclick="navigateTo('user-profile', ${c.user_id})">${escapeHtml(c.user_name)}</div>
-                            <div class="comment-text">${escapeHtml(c.content)}</div>
+                            <div class="comment-text rich-content">${renderRichContent(c.content)}</div>
                             <div class="comment-time">${c.created_at || ''}</div>
                             <div class="comment-actions">
                                 <button class="small ghost-danger" onclick="doDeleteComment(${c.id}, ${p.user_id})">删除</button>
@@ -786,6 +914,7 @@
             if (res) {
                 showToast('评论成功', 'success');
                 document.getElementById('commentContent').value = '';
+                document.getElementById('commentImagePreview').innerHTML = '';
                 loadPostDetail(); // 刷新
             }
         }
@@ -1005,6 +1134,10 @@
         // 键盘快捷键：Enter 登录
         document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
         document.getElementById('regPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+
+        // textarea 内容变化时实时更新图片预览
+        document.getElementById('postContent').addEventListener('input', () => renderImagePreviewFromText('post'));
+        document.getElementById('commentContent').addEventListener('input', () => renderImagePreviewFromText('comment'));
     </script>
 </body>
 </html>

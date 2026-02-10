@@ -362,3 +362,10 @@
 {"level":"WARN","ts":"2026-02-09T21:35:15.560+0800","msg":"用户未找到","func":"msq.Gorm.GetProfile","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":28}
 {"level":"WARN","ts":"2026-02-09T21:35:20.654+0800","msg":"用户未找到","func":"msq.Gorm.GetProfile","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":28}
 {"level":"WARN","ts":"2026-02-09T21:35:23.778+0800","msg":"用户未找到","func":"msq.Gorm.GetProfile","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":28}
+{"level":"INFO","ts":"2026-02-09T22:21:28.871+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-09T22:21:29.328+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-09T22:21:29.328+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-09T22:21:29.692+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-09T22:21:29.693+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"ERROR","ts":"2026-02-09T22:21:38.098+0800","msg":"无效token","error":"token is expired by 34m16s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-09T22:21:38.099+0800","msg":"无效token","error":"token is expired by 34m16s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}

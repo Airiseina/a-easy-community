@@ -186,7 +186,7 @@ func ChangeAvatar(c *gin.Context) {
 		response.FailWithCode(c, response.INVALID_PARAMS, response.GetMsg(response.INVALID_PARAMS))
 		return
 	}
-	ext := filepath.Ext(file.Filename)
+	ext := strings.ToLower(filepath.Ext(file.Filename))
 	account := c.GetString("account")
 	newFileName := fmt.Sprintf("%s_%d%s", account, time.Now().Unix(), ext)
 	err = os.MkdirAll("./uploads/avatars", 0755)
@@ -251,6 +251,7 @@ func Muted(c *gin.Context) {
 	}
 	response.Ok(c)
 }
+
 func RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {

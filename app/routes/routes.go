@@ -50,6 +50,8 @@ func Routes() {
 		protected.DELETE("/posts/:postId/:posterId/:commentId", api.DeleteComment)
 		//禁言
 		protected.POST("/muted/:Id", api.Muted)
+		//为文章添加图片
+		protected.POST("/upload", api.UploadImage)
 	}
 	r.Run(":8080")
 }
