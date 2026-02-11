@@ -4,6 +4,7 @@ import (
 	"commmunity/app/internal/model"
 	"commmunity/app/internal/response"
 	"commmunity/app/internal/service/controller"
+	"commmunity/app/internal/service/feed"
 	"commmunity/app/zlog"
 	"os"
 	"path/filepath"
@@ -72,7 +73,7 @@ func GetPostList(c *gin.Context) {
 		response.FailWithCode(c, response.INVALID_PARAMS, response.GetMsg(response.INVALID_PARAMS))
 		return
 	}
-	pageSize := 10 //每页十条文章
+	pageSize := 10
 	offset := (page - 1) * pageSize
 	posts, err := controller.GetPostList(offset, pageSize)
 	if err != nil {
@@ -179,4 +180,42 @@ func DeleteComment(c *gin.Context) {
 		return
 	}
 	response.Ok(c)
+}
+
+func ToggleLike(c *gin.Context) {
+	postId, err := strconv.ParseUint(c.Param("postId"), 10, 64)
+	if err != nil {
+		zlog.Error("转换失败")
+		response.Fail(c)
+	}
+	postIdInt := uint(postId)
+	account := c.GetString("account")
+	isLike, count, err := controller.ToggleLike(postIdInt, account)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	response.OkWithData(c, gin.H{"isLike": isLike, "count": count})
+}
+
+func GetFollowingPost(c *gin.Context) {
+	account := c.GetString("account")
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		zlog.Warn("请求出错了")
+		response.FailWithCode(c, response.INVALID_PARAMS, response.GetMsg(response.INVALID_PARAMS))
+		return
+	}
+	pageSize := 10
+	offset := (page - 1) * pageSize
+	posts, err := feed.GetFollowingPosts(account, offset, pageSize)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if len(posts) == 0 {
+		response.OkWithData(c, "你的暂时没有关注的对象哦")
+		return
+	}
+	response.OkWithData(c, posts)
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"commmunity/app/internal/model"
 	"commmunity/app/internal/response"
+	"commmunity/app/internal/service/feed"
 	"commmunity/app/internal/service/login"
 	"commmunity/app/utils"
 	"commmunity/app/zlog"
@@ -71,13 +72,13 @@ func Login(c *gin.Context) {
 		return
 	}
 	c.SetCookie(
-		"refresh_token", // Cookie 名字
-		refreshToken,    // 值
-		3600*24*7,       // 过期时间 (秒)，这里设为 7 天
-		"/",             // Path
-		"localhost",     // Domain (上线换成你的域名)
-		false,           // Secure: 本地开发 false (HTTP)，上线必须 true (HTTPS)
-		true,            // HttpOnly: 【关键】开启！禁止 JS 读取
+		"refresh_token",
+		refreshToken,
+		3600*24*7,
+		"/",
+		"localhost",
+		false, // Secure: 本地开发 false (HTTP)，上线必须 true (HTTPS)
+		true,
 	)
 	response.OkWithData(c, gin.H{"token": token})
 }
@@ -113,13 +114,13 @@ func Logout(c *gin.Context) {
 		return
 	}
 	c.SetCookie(
-		"refresh_token", // 名字必须一样
-		"",              // 值设为空
-		-1,              // MaxAge < 0 表示删除
-		"/",             // Path 必须一样
-		"localhost",     // Domain 必须一样
-		false,           // Secure
-		true,            // HttpOnly
+		"refresh_token",
+		"",
+		-1,
+		"/",
+		"localhost",
+		false,
+		true,
 	)
 	response.Ok(c)
 }
@@ -252,6 +253,50 @@ func Muted(c *gin.Context) {
 	response.Ok(c)
 }
 
+func Follow(c *gin.Context) {
+	account := c.GetString("account")
+	id, err := strconv.ParseUint(c.Param("Id"), 10, 64)
+	if err != nil {
+		zlog.Error("转换失败")
+		response.Fail(c)
+	}
+	followerId := uint(id)
+	err, isFollow := feed.Follow(account, followerId)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	response.OkWithData(c, gin.H{"isFollow": isFollow})
+}
+
+func GetFollowers(c *gin.Context) {
+	account := c.GetString("account")
+	followers, err := feed.GetFollowers(account)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if len(followers) == 0 {
+		response.OkWithData(c, "目前没有粉丝喵")
+		return
+	}
+	response.OkWithData(c, followers)
+}
+
+func GetFollowings(c *gin.Context) {
+	account := c.GetString("account")
+	followings, err := feed.GetFollowings(account)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if len(followings) == 0 {
+		response.OkWithData(c, "目前没有你在意的人喵")
+		return
+	}
+	response.OkWithData(c, followings)
+}
+
 func RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
@@ -263,12 +308,10 @@ func RefreshToken(c *gin.Context) {
 		response.FailWithMessage(c, "登录已彻底过期，请重新登录")
 		return
 	}
-
-	// 3. (可选) 检查 Redis 黑名单
-	// 如果 Refresh Token 也在黑名单（用户注销了），那也不能换
-
-	// 4. 签发新的 Access Token
+	if !login.IsTokenValid(refreshToken) {
+		response.FailWithMessage(c, "请重新登录")
+		return
+	}
 	newAccessToken, _, err := utils.MakeToken(claims.Account, claims.Role)
-	// 5. (可选) 甚至可以把 Refresh Token 也顺便换个新的 (Token Rotation 策略)
 	response.OkWithData(c, gin.H{"access_token": newAccessToken})
 }

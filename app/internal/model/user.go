@@ -12,6 +12,8 @@ type User struct {
 	Account     string      `gorm:"type:varchar(100);uniqueIndex;not null"`
 	Hash        string      `gorm:"not null"`
 	Role        int         `gorm:"type:tinyint;default:0;comment:角色 0:普通用户 1:管理员"`
+	Followings  []*User     `gorm:"many2many:user_relations;joinForeignKey:follower_id;joinReferences:followed_id"`
+	Followers   []*User     `gorm:"many2many:user_relations;joinForeignKey:followed_id;joinReferences:follower_id"`
 	UserProfile UserProfile `gorm:"foreignKey:UserID" json:"user_profile"`
 	Posts       []Post      `gorm:"foreignKey:UserID" json:"posts"`
 }
@@ -23,6 +25,13 @@ type UserProfile struct {
 	Introduction string `gorm:"type:varchar(100);not null"`
 	Avatar       string `gorm:"type:varchar(255);default:'';comment:头像URL"`
 	IsMuted      bool   `gorm:"default:false;comment:是否禁言"`
+}
+
+type UserRelation struct {
+	FollowerID uint `gorm:"uniqueIndex:idx_relation"`
+	FollowedID uint `gorm:"uniqueIndex:idx_relation"`
+	Follower   User `gorm:"foreignKey:FollowerID"`
+	Followed   User `gorm:"foreignKey:FollowedID"`
 }
 type UserRequest struct {
 	Account  string `json:"account"`

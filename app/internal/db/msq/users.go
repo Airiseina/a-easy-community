@@ -128,3 +128,57 @@ func (db Gorm) Muted(userID uint, isMuted bool) error {
 	}
 	return nil
 }
+
+func (db Gorm) Follow(followedId uint, followerId uint) error {
+	follower := model.User{Model: gorm.Model{ID: followerId}}
+	followed := model.User{Model: gorm.Model{ID: followedId}}
+	err := db.db.Model(&follower).Association("Followings").Append(&followed)
+	if err != nil {
+		zlog.Error("关注失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (db Gorm) Unfollow(followedId uint, followerId uint) error {
+	follower := model.User{Model: gorm.Model{ID: followerId}}
+	followed := model.User{Model: gorm.Model{ID: followedId}}
+	err := db.db.Model(&follower).Association("Followings").Delete(&followed)
+	if err != nil {
+		zlog.Error("取关失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (db Gorm) GetFollowers(userId uint) ([]model.User, error) {
+	var users []model.User
+	me := model.User{Model: gorm.Model{ID: userId}}
+	err := db.db.Model(&me).Preload("UserProfile").Association("Followers").Find(&users)
+	if err != nil {
+		zlog.Error("获取粉丝失败", zap.Error(err))
+		return nil, err
+	}
+	return users, nil
+}
+
+func (db Gorm) GetFollowings(userId uint) ([]model.User, error) {
+	var users []model.User
+	me := model.User{Model: gorm.Model{ID: userId}}
+	err := db.db.Model(&me).Preload("UserProfile").Association("Followings").Find(&users)
+	if err != nil {
+		zlog.Error("获取关注者失败", zap.Error(err))
+		return nil, err
+	}
+	return users, nil
+}
+
+func (db Gorm) IsFollowing(followedId uint, followerId uint) (bool, error) {
+	var count int64
+	err := db.db.Model(&model.UserRelation{}).Where("follower_id = ? AND followed_id = ?", followerId, followedId).Count(&count).Error
+	if err != nil {
+		zlog.Error("判断是否关注失败", zap.Error(err))
+		return false, err
+	}
+	return count > 0, nil
+}

@@ -13,6 +13,11 @@ type UserData interface {
 	ChangeIntroduction(account string, introduction string) error
 	GetUserId(account string) (model.User, error)
 	Muted(userID uint, isMuted bool) error
+	Follow(followedId uint, followerId uint) error
+	Unfollow(followedId uint, followerId uint) error
+	GetFollowers(userId uint) ([]model.User, error)
+	GetFollowings(userId uint) ([]model.User, error)
+	IsFollowing(followedId uint, followerId uint) (bool, error)
 }
 
 type PostData interface {
@@ -24,4 +29,6 @@ type PostData interface {
 	DeletePost(postID uint) error
 	DeleteComment(commentID uint) error
 	GetCommentDetail(commentID uint) (model.Comment, error)
+	Like(postId uint, likeCount uint) error
+	GetFollowingPosts(userId uint, offset int, pageSize int) ([]model.Post, error)
 }

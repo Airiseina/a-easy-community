@@ -2,12 +2,17 @@ package routes
 
 import (
 	"commmunity/app/internal/api"
+	"commmunity/app/internal/cron"
 	"commmunity/app/middleware"
+	"context"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Routes() {
+	cronManager := cron.NewCronManager(1 * time.Minute)
+	cronManager.Start(context.Background(), cron.SyncPostLikes)
 	r := gin.Default()
 	r.Use(middleware.CorsMiddleWare())
 	r.Static("/static", "./uploads")
@@ -25,7 +30,7 @@ func Routes() {
 		// 修改用户名
 		protected.PATCH("/username", api.ChangeUserName)
 		// 修改密码
-		protected.POST("/password-change", api.ChangePassword)
+		protected.POST("/password-change", middleware.RateLimitingMiddleware("changePassword", 5*time.Second, 1), api.ChangePassword)
 		// 修改头像
 		protected.POST("/avatar", api.ChangeAvatar)
 		// 修改简介
@@ -35,13 +40,13 @@ func Routes() {
 		//	退出登录
 		protected.POST("/logout", api.Logout)
 		//发布文章
-		protected.POST("/posts", api.CreatePost)
+		protected.POST("/posts", middleware.RateLimitingMiddleware("createPost", 5*time.Second, 1), api.CreatePost)
 		//论坛主页
 		protected.GET("/posts", api.GetPostList)
 		//文章主页
 		protected.GET("/posts/:postId", api.GetPostDetail)
 		//发表评论
-		protected.POST("/posts/:postId", api.CreateComment)
+		protected.POST("/posts/:postId", middleware.RateLimitingMiddleware("createComment", 3*time.Second, 1), api.CreateComment)
 		//查找作者主页
 		protected.GET("/users/:Id", api.GetUserProfile)
 		//删除文章
@@ -52,6 +57,16 @@ func Routes() {
 		protected.POST("/muted/:Id", api.Muted)
 		//为文章添加图片
 		protected.POST("/upload", api.UploadImage)
+		//点赞
+		protected.POST("posts/:postId/like", middleware.RateLimitingMiddleware("like", 5*time.Second, 2), api.ToggleLike)
+		//关注
+		protected.POST("/follow/:Id", api.Follow)
+		//关注列表
+		protected.GET("/following", api.GetFollowings)
+		//粉丝列表
+		protected.GET("/follow", api.GetFollowers)
+		//关注动态
+		protected.GET("/following_post", api.GetFollowingPost)
 	}
 	r.Run(":8080")
 }

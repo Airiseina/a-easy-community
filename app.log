@@ -369,3 +369,106 @@
 {"level":"INFO","ts":"2026-02-09T22:21:29.693+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
 {"level":"ERROR","ts":"2026-02-09T22:21:38.098+0800","msg":"无效token","error":"token is expired by 34m16s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
 {"level":"ERROR","ts":"2026-02-09T22:21:38.099+0800","msg":"无效token","error":"token is expired by 34m16s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-10T15:53:45.668+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-10T15:53:46.315+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-10T15:53:46.315+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-10T15:53:46.678+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-10T15:53:46.678+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-10T22:06:29.685+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-10T22:06:30.345+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-10T22:06:30.345+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-10T22:06:30.737+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-10T22:06:30.737+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-10T22:06:30.737+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"INFO","ts":"2026-02-11T17:42:41.418+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T17:42:41.816+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T17:42:41.817+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T17:42:42.187+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T17:42:42.188+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T17:42:42.188+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"INFO","ts":"2026-02-11T17:43:57.968+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T17:43:58.460+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T17:43:58.461+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T17:43:58.837+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T17:43:58.837+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T17:43:58.837+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T17:45:32.451+0800","msg":"判断是否关注失败","error":"Error 1054 (42S22): Unknown column 'user_relations.deleted_at' in 'where clause'","func":"msq.Gorm.IsFollowing","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":180}
+{"level":"ERROR","ts":"2026-02-11T17:46:24.620+0800","msg":"判断是否关注失败","error":"Error 1054 (42S22): Unknown column 'user_relations.deleted_at' in 'where clause'","func":"msq.Gorm.IsFollowing","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":180}
+{"level":"ERROR","ts":"2026-02-11T17:46:33.998+0800","msg":"判断是否关注失败","error":"Error 1054 (42S22): Unknown column 'user_relations.deleted_at' in 'where clause'","func":"msq.Gorm.IsFollowing","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/users.go","line":180}
+{"level":"INFO","ts":"2026-02-11T17:57:18.834+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T17:57:19.239+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T17:57:19.239+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T17:57:19.622+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T17:57:19.623+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T17:57:19.623+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"INFO","ts":"2026-02-11T18:00:34.567+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T18:00:34.962+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T18:00:34.963+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T18:00:35.340+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T18:00:35.340+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T18:00:35.340+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T18:00:37.764+0800","msg":"无效token","error":"token is expired by 49s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-11T18:08:43.364+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T18:08:43.757+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T18:08:43.757+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T18:08:44.138+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T18:08:44.139+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T18:08:44.139+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"INFO","ts":"2026-02-11T19:37:47.321+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T19:37:47.770+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T19:37:47.770+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T19:37:48.156+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T19:37:48.157+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T19:37:48.157+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T19:39:37.724+0800","msg":"无效token","error":"token is expired by 1h23m56s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-11T19:41:16.511+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T19:41:16.929+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T19:41:16.929+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T19:41:17.303+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T19:41:17.303+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T19:41:17.303+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"INFO","ts":"2026-02-11T19:44:14.524+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T19:44:14.930+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T19:44:14.931+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T19:44:15.313+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T19:44:15.313+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T19:44:15.313+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"INFO","ts":"2026-02-11T20:53:47.931+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T20:53:48.464+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T20:53:48.464+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T20:53:48.868+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T20:53:48.868+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T20:53:48.868+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T20:54:18.704+0800","msg":"无效token","error":"token is expired by 28h42m19s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"INFO","ts":"2026-02-11T21:04:01.493+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T21:04:01.940+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T21:04:01.940+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T21:04:02.333+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T21:04:02.333+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T21:04:02.333+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T21:04:52.499+0800","msg":"无效token","error":"token is expired by 1h5m36s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-11T21:04:52.500+0800","msg":"无效token","error":"token is expired by 1h5m36s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-11T21:06:52.031+0800","msg":"点赞存入数据库失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.Like","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":125}
+{"level":"ERROR","ts":"2026-02-11T21:06:52.032+0800","msg":"同步Post点赞数失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"cron.SyncPostLikes","file":"E:/Documents/Github/a-easy-community/app/internal/cron/tasks.go","line":67}
+{"level":"INFO","ts":"2026-02-11T21:07:36.092+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T21:07:36.493+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T21:07:36.494+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T21:07:36.886+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T21:07:36.886+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T21:07:36.886+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T21:10:27.469+0800","msg":"点赞存入数据库失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.Like","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":121}
+{"level":"ERROR","ts":"2026-02-11T21:10:27.470+0800","msg":"同步Post点赞数失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"cron.SyncPostLikes","file":"E:/Documents/Github/a-easy-community/app/internal/cron/tasks.go","line":67}
+{"level":"ERROR","ts":"2026-02-11T21:11:08.103+0800","msg":"评论创建失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.CreateComment","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":67}
+{"level":"ERROR","ts":"2026-02-11T21:11:11.684+0800","msg":"评论创建失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.CreateComment","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":67}
+{"level":"ERROR","ts":"2026-02-11T21:11:15.647+0800","msg":"评论创建失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.CreateComment","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":67}
+{"level":"ERROR","ts":"2026-02-11T21:11:18.618+0800","msg":"评论创建失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.CreateComment","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":67}
+{"level":"ERROR","ts":"2026-02-11T21:11:27.667+0800","msg":"点赞存入数据库失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"msq.Gorm.Like","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/posts.go","line":121}
+{"level":"ERROR","ts":"2026-02-11T21:11:27.667+0800","msg":"同步Post点赞数失败","error":"Error 1205 (HY000): Lock wait timeout exceeded; try restarting transaction","func":"cron.SyncPostLikes","file":"E:/Documents/Github/a-easy-community/app/internal/cron/tasks.go","line":67}
+{"level":"INFO","ts":"2026-02-11T21:20:34.577+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T21:20:34.991+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T21:20:34.991+0800","msg":"未找到配置文件，使用默认值","func":"config.GetConfig","file":"E:/Documents/Github/a-easy-community/app/config/config.go","line":35}
+{"level":"INFO","ts":"2026-02-11T21:20:35.375+0800","msg":"自动迁移成功","func":"msq.ConnectMysql","file":"E:/Documents/Github/a-easy-community/app/internal/db/msq/connectMysql.go","line":42}
+{"level":"INFO","ts":"2026-02-11T21:20:35.376+0800","msg":"程序启动","func":"main.main","file":"E:/Documents/Github/a-easy-community/main.go","line":9}
+{"level":"INFO","ts":"2026-02-11T21:20:35.376+0800","msg":"定时任务管理器启动","func":"cron.(*CronManager).Start.func1","file":"E:/Documents/Github/a-easy-community/app/internal/cron/cron.go","line":27}
+{"level":"ERROR","ts":"2026-02-11T21:20:40.419+0800","msg":"无效token","error":"token is expired by 48s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}
+{"level":"ERROR","ts":"2026-02-11T21:20:40.419+0800","msg":"无效token","error":"token is expired by 48s","func":"utils.ParseToken","file":"E:/Documents/Github/a-easy-community/app/utils/utils.go","line":64}

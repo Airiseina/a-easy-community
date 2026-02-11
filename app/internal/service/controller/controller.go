@@ -3,7 +3,9 @@ package controller
 import (
 	"commmunity/app/internal/db/global"
 	"commmunity/app/internal/model"
+	"context"
 	"fmt"
+	"time"
 )
 
 func CreatePost(account string, title string, content string) (error, bool) {
@@ -68,6 +70,7 @@ func GetPostDetail(postId uint) (PostDTO, error) {
 	if err != nil {
 		return PostDTO{}, err
 	}
+
 	commentDTOs := make([]CommentDTO, 0, len(p.Comments))
 	for _, c := range p.Comments {
 		commentDTOs = append(commentDTOs, CommentDTO{
@@ -152,7 +155,7 @@ func GetUserProfile(id uint) (*UserProfileDTO, error) {
 }
 
 func DeletePost(account string, postID uint, role int) (error, bool) {
-	//先判断是否为管理员是否为作者文章
+	//先判断是否为管理员，是否为作者文章
 	user, err := global.Post.GetPostDetail(postID)
 	if err != nil {
 		return err, false
@@ -189,7 +192,46 @@ func DeleteComment(account string, commentID uint, role int) (error, bool) {
 	return nil, false
 }
 
-func ToggleLike(postId uint, userId uint) (bool, int, error) {
+func ToggleLike(postId uint, account string) (bool, int, error) {
 	key := fmt.Sprintf("post:likes:%d", postId)
+	isLike, err := global.PostRedis.IsLike(key, account)
+	if err != nil {
+		return false, 0, err
+	}
+	if isLike {
+		err = global.PostRedis.Unlike(key, account)
+		if err != nil {
+			return false, 0, err
+		}
+		isLike = false
+	} else {
+		err = global.PostRedis.Like(key, account)
+		if err != nil {
+			return false, 0, err
+		}
+		isLike = true
+	}
+	c, err := global.PostRedis.LikeCount(key)
+	if err != nil {
+		return false, 0, err
+	}
+	count := int(c)
+	return isLike, count, nil
+}
 
+func RateLimiting(ctx context.Context, key string, limitDuration time.Duration, limitCount int) (bool, error) {
+	count, err := global.PostRedis.RateLimiting(ctx, key)
+	if err != nil {
+		return false, err
+	}
+	if count == 1 {
+		err = global.PostRedis.Expire(ctx, key, limitDuration)
+		if err != nil {
+			return false, err
+		}
+	}
+	if int(count) > limitCount {
+		return false, nil
+	}
+	return true, nil
 }

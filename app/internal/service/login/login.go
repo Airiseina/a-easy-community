@@ -107,7 +107,7 @@ func Logout(token string, refreshToken string) error {
 	if timeLeft <= 0 {
 		return nil
 	}
-	err = global.Redis.AddToBlacklist(token, time.Duration(timeLeft)*time.Second)
+	err = global.UserRedis.AddToBlacklist(token, time.Duration(timeLeft)*time.Second)
 	if err != nil {
 		zlog.Error("token拉入黑名单失败", zap.String("token", token))
 		return err
@@ -120,7 +120,7 @@ func Logout(token string, refreshToken string) error {
 	if timeLeft1 <= 0 {
 		return nil
 	}
-	err = global.Redis.AddToBlacklist(refreshToken, time.Duration(timeLeft1)*time.Second)
+	err = global.UserRedis.AddToBlacklist(refreshToken, time.Duration(timeLeft1)*time.Second)
 	if err != nil {
 		zlog.Error("refreshToken拉入黑名单失败", zap.String("refreshToken", refreshToken))
 		return err
@@ -192,7 +192,7 @@ func GetUserRole(account string) (int, error) {
 }
 
 func IsTokenValid(tokenStr string) bool {
-	if global.Redis.IsInBlacklist(tokenStr) {
+	if global.UserRedis.IsInBlacklist(tokenStr) {
 		return false
 	}
 	return true

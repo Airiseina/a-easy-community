@@ -3,22 +3,28 @@ package msq
 import (
 	"commmunity/app/internal/model"
 	"commmunity/app/zlog"
-	"fmt"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 func (db Gorm) CreatePost(userID uint, title string, content string) error {
+	tx := db.db.Begin()
 	post := model.Post{
 		UserID:  userID,
 		Title:   title,
 		Content: content,
 	}
-	result := db.db.Create(&post)
+	result := tx.Create(&post)
 	if result.Error != nil {
 		zlog.Error("帖子创建失败", zap.Error(result.Error))
+		tx.Rollback()
 		return result.Error
+	}
+	err := tx.Commit().Error
+	if err != nil {
+		zlog.Error("事务提交失败", zap.Error(err))
+		return err
 	}
 	return nil
 }
@@ -36,14 +42,8 @@ func (db Gorm) GetPostList(offset int, pageSize int) ([]model.Post, error) {
 		zlog.Error("论坛生成失败", zap.Error(err))
 		return nil, err
 	}
-	for _, post := range posts {
-		fmt.Println(post)
-	}
 	return posts, nil
 }
-
-//// 获得作者所有的文章
-//func (db Gorm) GetPosts(userID uint) ([]model.Post, error) {}
 
 func (db Gorm) GetPostDetail(postID uint) (model.Post, error) {
 	var post model.Post
@@ -61,15 +61,28 @@ func (db Gorm) GetPostDetail(postID uint) (model.Post, error) {
 }
 
 func (db Gorm) CreateComment(userID uint, postID uint, content string) error {
+	tx := db.db.Begin()
 	comment := model.Comment{
 		PostID:  postID,
 		UserID:  userID,
 		Content: content,
 	}
-	result := db.db.Create(&comment)
+	result := tx.Create(&comment)
 	if result.Error != nil {
 		zlog.Error("评论创建失败", zap.Error(result.Error))
+		tx.Rollback()
 		return result.Error
+	}
+	err := tx.Model(&model.Post{}).Where("id = ?", postID).
+		UpdateColumn("comment_count", gorm.Expr("comment_count + ?", 1)).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		zlog.Error("事务提交失败", zap.Error(err))
+		return err
 	}
 	return nil
 }
@@ -110,4 +123,43 @@ func (db Gorm) GetCommentDetail(commentID uint) (model.Comment, error) {
 		return model.Comment{}, err
 	}
 	return comment, nil
+}
+
+func (db Gorm) Like(postId uint, likeCount uint) error {
+	err := db.db.Model(&model.Post{}).Where("id = ?", postId).Update("like_count", likeCount).Error
+	if err != nil {
+		zlog.Error("点赞存入数据库失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (db Gorm) GetFollowingPosts(userId uint, offset int, pageSize int) ([]model.Post, error) {
+	var posts []model.Post
+	var followedIds []uint
+
+	err := db.db.Model(&model.UserRelation{}).
+		Where("follower_id IN (?)", userId).
+		Pluck("followed_id", &followedIds).Error
+	if err != nil {
+		zlog.Error("查找关注失败", zap.Error(err))
+		return nil, err
+	}
+	if len(followedIds) == 0 {
+		return posts, nil
+	}
+	err = db.db.Model(model.Post{}).
+		Preload("User").
+		Preload("User.UserProfile").
+		Where("user_id IN ?", followedIds).
+		Preload("User").
+		Order("created_at desc").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&posts).Error
+	if err != nil {
+		zlog.Error("加载关注动态失败", zap.Error(err))
+		return nil, err
+	}
+	return posts, nil
 }

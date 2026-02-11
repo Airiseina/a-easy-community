@@ -2,10 +2,13 @@ package middleware
 
 import (
 	"commmunity/app/internal/response"
+	"commmunity/app/internal/service/controller"
 	"commmunity/app/internal/service/login"
 	"commmunity/app/utils"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,6 +58,25 @@ func CorsMiddleWare() gin.HandlerFunc {
 				c.AbortWithStatus(http.StatusNoContent)
 				return
 			}
+		}
+		c.Next()
+	}
+}
+
+func RateLimitingMiddleware(limitKey string, limitDuration time.Duration, limitCount int) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		account := c.GetString("account")
+		key := fmt.Sprintf("rate_limit:%s:%s", limitKey, account)
+		isPost, err := controller.RateLimiting(c, key, limitDuration, limitCount)
+		if err != nil {
+			response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+			c.Abort()
+			return
+		}
+		if !isPost {
+			response.FailWithMessage(c, "操作频繁，请稍后再试")
+			c.Abort()
+			return
 		}
 		c.Next()
 	}
