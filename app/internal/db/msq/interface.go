@@ -1,6 +1,9 @@
 package msq
 
-import "commmunity/app/internal/model"
+import (
+	"commmunity/app/internal/model"
+	"time"
+)
 
 type UserData interface {
 	CreateUser(account string, hash string, name string) error
@@ -31,4 +34,7 @@ type PostData interface {
 	GetCommentDetail(commentID uint) (model.Comment, error)
 	Like(postId uint, likeCount uint) error
 	GetFollowingPosts(userId uint, offset int, pageSize int) ([]model.Post, error)
+	View(postId uint, viewCount uint) error
+	RecentPosts(recentTime time.Time) ([]model.Post, error)
+	HotPosts(postIds []uint) ([]model.Post, error)
 }

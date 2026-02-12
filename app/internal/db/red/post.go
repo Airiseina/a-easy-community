@@ -1,10 +1,13 @@
 package red
 
 import (
+	"commmunity/app/internal/model"
 	"commmunity/app/zlog"
 	"context"
+	"strconv"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -44,7 +47,7 @@ func (rdb Redis) LikeCount(key string) (int64, error) {
 	return count, nil
 }
 
-func (rdb Redis) ScanLikes(match string, cursor uint64) (uint64, []string, error) {
+func (rdb Redis) ScanRedis(match string, cursor uint64) (uint64, []string, error) {
 	result := rdb.redis.Scan(rdb.context, cursor, match, 100)
 	if result.Err() != nil {
 		zlog.Error("查找缓存失败", zap.Error(result.Err()))
@@ -63,9 +66,9 @@ func (rdb Redis) Expire(ctx context.Context, key string, expiration time.Duratio
 }
 
 func (rdb Redis) LimitView(key string) (bool, error) {
-	exist, err := rdb.redis.SetNX(rdb.context, key, 1, 5*time.Minute).Result()
+	exist, err := rdb.redis.SetNX(rdb.context, key, 1, 5*time.Minute).Result() //一个账户限制5分钟算一个播放量
 	if err != nil {
-		zlog.Error("限制浏览量出问题", zap.Error(err))
+		zlog.Error("限制播放量出问题", zap.Error(err))
 		return false, err
 	}
 	return exist, nil
@@ -81,10 +84,41 @@ func (rdb Redis) View(key string) error {
 }
 
 func (rdb Redis) ViewCount(key string) (int, error) {
-	count, err := rdb.redis.Incr(rdb.context, key).Result()
+	strCount, err := rdb.redis.Get(rdb.context, key).Result()
 	if err != nil {
 		zlog.Error("查询播放量出问题", zap.Error(err))
 		return 0, err
 	}
-	return int(count), nil
+	count, err := strconv.Atoi(strCount)
+	if err != nil {
+		zlog.Error("播放量类型转换失败", zap.Error(err))
+		return 0, err
+	}
+	return count, nil
+}
+
+func (rdb Redis) HotRank(posts []model.Post) error {
+	var zMembers []redis.Z
+	for _, post := range posts {
+		score := float64(post.LikeCount)*1.5 + float64(post.CommentCount)*1 + float64(post.ViewCount)*0.1
+		zMembers = append(zMembers, redis.Z{
+			Score:  score,
+			Member: post.ID,
+		})
+	}
+	err := rdb.redis.ZAdd(rdb.context, "rank:hot", zMembers...).Err()
+	if err != nil {
+		zlog.Error("存入热度缓存失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (rdb Redis) GetHotRank() ([]redis.Z, error) {
+	results, err := rdb.redis.ZRevRangeWithScores(rdb.context, "rank:hot", 0, 9).Result()
+	if err != nil {
+		zlog.Error("提取热度前10失败", zap.Error(err))
+		return nil, err
+	}
+	return results, err
 }

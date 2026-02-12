@@ -3,9 +3,13 @@ package controller
 import (
 	"commmunity/app/internal/db/global"
 	"commmunity/app/internal/model"
+	"commmunity/app/zlog"
 	"context"
 	"fmt"
+	"strconv"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func CreatePost(account string, title string, content string) (error, bool) {
@@ -65,12 +69,23 @@ type CommentDTO struct {
 	UserId     uint   `json:"user_id"`
 }
 
-func GetPostDetail(postId uint) (PostDTO, error) {
+func GetPostDetail(account string, postId uint) (PostDTO, error) {
 	p, err := global.Post.GetPostDetail(postId)
 	if err != nil {
 		return PostDTO{}, err
 	}
-
+	key := fmt.Sprintf("post:view:%d", postId)
+	limitKey := fmt.Sprintf("post:view:limit:%s:%d", account, postId)
+	flag, err := global.PostRedis.LimitView(limitKey)
+	if err != nil {
+		return PostDTO{}, err
+	}
+	if flag {
+		err = global.PostRedis.View(key)
+		if err != nil {
+			return PostDTO{}, err
+		}
+	}
 	commentDTOs := make([]CommentDTO, 0, len(p.Comments))
 	for _, c := range p.Comments {
 		commentDTOs = append(commentDTOs, CommentDTO{
@@ -234,4 +249,41 @@ func RateLimiting(ctx context.Context, key string, limitDuration time.Duration, 
 		return false, nil
 	}
 	return true, nil
+}
+
+func GetHotRank() ([]PostsDTO, map[uint]float64, error) {
+	var postIds []uint
+	score := make(map[uint]float64)
+	postsZ, err := global.PostRedis.GetHotRank()
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, z := range postsZ {
+		idStr := z.Member.(string)
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			zlog.Error("解析字符串失败", zap.Error(err))
+			return nil, nil, err
+		}
+		postId := uint(id)
+		postIds = append(postIds, postId)
+		score[postId] = z.Score
+	}
+	ps, err := global.Post.HotPosts(postIds)
+	if err != nil {
+		return nil, nil, err
+	}
+	posts := make([]PostsDTO, len(ps))
+	for i, p := range ps {
+		posts[i] = PostsDTO{
+			Name:         p.User.UserProfile.Name,
+			Avatar:       p.User.UserProfile.Avatar,
+			PostID:       p.ID,
+			Title:        p.Title,
+			ViewCount:    p.ViewCount,
+			LikeCount:    p.LikeCount,
+			CommentCount: p.CommentCount,
+		}
+	}
+	return posts, score, nil
 }

@@ -91,7 +91,8 @@ func GetPostDetail(c *gin.Context) {
 		return
 	}
 	postIdInt := uint(postId)
-	post, err := controller.GetPostDetail(postIdInt)
+	account := c.GetString("account")
+	post, err := controller.GetPostDetail(account, postIdInt)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -218,4 +219,19 @@ func GetFollowingPost(c *gin.Context) {
 		return
 	}
 	response.OkWithData(c, posts)
+}
+
+func GetHotRank(c *gin.Context) {
+	var hotPosts []interface{}
+	posts, score, err := controller.GetHotRank()
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	for _, post := range posts {
+		if s, ok := score[post.PostID]; ok {
+			hotPosts = append(hotPosts, gin.H{"post": post, "score": s})
+		}
+	}
+	response.OkWithData(c, hotPosts)
 }

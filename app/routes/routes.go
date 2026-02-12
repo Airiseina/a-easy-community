@@ -11,8 +11,12 @@ import (
 )
 
 func Routes() {
-	cronManager := cron.NewCronManager(1 * time.Minute)
-	cronManager.Start(context.Background(), cron.SyncPostLikes)
+	cronLikeManager := cron.NewCronManager(1 * time.Minute)
+	cronLikeManager.Start(context.Background(), cron.SyncPostLikes)
+	cronViewManager := cron.NewCronManager(5 * time.Second)
+	cronViewManager.Start(context.Background(), cron.SyncView)
+	cronHotRankManager := cron.NewCronManager(5 * time.Second)
+	cronHotRankManager.Start(context.Background(), cron.RefreshHot)
 	r := gin.Default()
 	r.Use(middleware.CorsMiddleWare())
 	r.Static("/static", "./uploads")
@@ -67,6 +71,8 @@ func Routes() {
 		protected.GET("/follow", api.GetFollowers)
 		//关注动态
 		protected.GET("/following_post", api.GetFollowingPost)
+		//热度榜
+		protected.GET("/hot_rank", api.GetHotRank)
 	}
 	r.Run(":8080")
 }

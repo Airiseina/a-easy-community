@@ -128,8 +128,6 @@ func Logout(token string, refreshToken string) error {
 	return nil
 }
 
-// 注销后的用户应立即消除登录jwt
-
 func DeleteUser(account string) error {
 	err := global.User.DeleteUser(account)
 	if err != nil {

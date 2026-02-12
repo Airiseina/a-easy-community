@@ -66,7 +66,7 @@ func CorsMiddleWare() gin.HandlerFunc {
 func RateLimitingMiddleware(limitKey string, limitDuration time.Duration, limitCount int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		account := c.GetString("account")
-		key := fmt.Sprintf("rate_limit:%s:%s", limitKey, account)
+		key := fmt.Sprintf("rate:limit:%s:%s", limitKey, account)
 		isPost, err := controller.RateLimiting(c, key, limitDuration, limitCount)
 		if err != nil {
 			response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))

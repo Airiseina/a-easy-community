@@ -3,6 +3,7 @@ package msq
 import (
 	"commmunity/app/internal/model"
 	"commmunity/app/zlog"
+	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -159,6 +160,41 @@ func (db Gorm) GetFollowingPosts(userId uint, offset int, pageSize int) ([]model
 		Find(&posts).Error
 	if err != nil {
 		zlog.Error("加载关注动态失败", zap.Error(err))
+		return nil, err
+	}
+	return posts, nil
+}
+
+func (db Gorm) View(postId uint, viewCount uint) error {
+	err := db.db.Model(&model.Post{}).Where("id = ?", postId).Update("view_count", viewCount).Error
+	if err != nil {
+		zlog.Error("播放量存入数据库失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (db Gorm) RecentPosts(recentTime time.Time) ([]model.Post, error) {
+	var posts []model.Post
+	err := db.db.Preload("User.UserProfile").
+		Select("id, like_count, comment_count, view_count").
+		Where("created_at > ?", recentTime).
+		Find(&posts).Error
+	if err != nil {
+		zlog.Error("查找过去7天文章失败", zap.Error(err))
+		return nil, err
+	}
+	return posts, nil
+}
+
+func (db Gorm) HotPosts(postIds []uint) ([]model.Post, error) {
+	var posts []model.Post
+	err := db.db.Preload("User").
+		Preload("User.UserProfile").
+		Select("id, user_id, title, created_at, view_count, like_count, comment_count").
+		Where("id IN (?)", postIds).Find(&posts).Error
+	if err != nil {
+		zlog.Error("热度榜查找失败", zap.Error(err))
 		return nil, err
 	}
 	return posts, nil

@@ -179,7 +179,6 @@ func ChangeUserName(c *gin.Context) {
 	response.Ok(c)
 }
 
-// 将储存如硬盘的步骤移到serve层
 func ChangeAvatar(c *gin.Context) {
 	file, err := c.FormFile("avatar")
 	if err != nil {
