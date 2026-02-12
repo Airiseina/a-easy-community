@@ -236,6 +236,56 @@
         .toast.error { background: var(--error-color); }
         .toast.success { background: var(--success-color); }
 
+        /* 点赞按钮 */
+        .like-btn { transition: all 0.2s; }
+        .like-btn.liked { background: #ff4757; border-color: #ff4757; color: white; }
+        .like-btn.liked:hover { background: #ff6b81; }
+
+        /* 关注按钮 */
+        .follow-btn { transition: all 0.2s; min-width: 70px; }
+        .follow-btn.following { background: #e0e0e0; color: #666; border-color: #ccc; }
+        .follow-btn.following:hover { background: #ffebee; color: var(--error-color); border-color: var(--error-color); }
+
+        /* Tab 切换栏 */
+        .feed-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--border-color); }
+        .feed-tabs button {
+            background: transparent; color: var(--text-secondary); border: none; border-bottom: 2px solid transparent;
+            padding: 10px 20px; font-size: 14px; font-weight: 500; margin-bottom: -2px; border-radius: 0;
+        }
+        .feed-tabs button.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+        .feed-tabs button:hover { color: var(--primary-color); }
+
+        /* 热度榜 */
+        .hot-rank-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0; cursor: pointer;
+        }
+        .hot-rank-item:last-child { border-bottom: none; }
+        .hot-rank-item:hover { background: #fafafa; margin: 0 -10px; padding: 10px; }
+        .hot-rank-item .rank-num {
+            width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+        }
+        .hot-rank-item .rank-num.top1 { background: #ff4757; }
+        .hot-rank-item .rank-num.top2 { background: #ff6348; }
+        .hot-rank-item .rank-num.top3 { background: #ffa502; }
+        .hot-rank-item .rank-num.normal { background: #aaa; }
+        .hot-rank-item .rank-info { flex: 1; min-width: 0; }
+        .hot-rank-item .rank-info .rank-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hot-rank-item .rank-info .rank-score { font-size: 11px; color: var(--text-secondary); }
+
+        /* 关注/粉丝列表 */
+        .follow-list-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .follow-list-item:last-child { border-bottom: none; }
+        .follow-list-item img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+        .follow-list-item .follow-info { flex: 1; min-width: 0; }
+        .follow-list-item .follow-info .follow-name { font-weight: 600; font-size: 14px; cursor: pointer; }
+        .follow-list-item .follow-info .follow-name:hover { color: var(--primary-color); }
+        .follow-list-item .follow-info .follow-intro { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         @media (max-width: 768px) {
             .main-layout { grid-template-columns: 1fr; }
             .sidebar { order: -1; }
@@ -336,7 +386,10 @@
         <div id="page-feed" class="page main-layout">
             <div class="feed-main">
                 <div class="card">
-                    <h2>📰 最新帖子</h2>
+                    <div class="feed-tabs">
+                        <button id="tabLatest" class="active" onclick="switchFeedTab('latest')">📰 最新帖子</button>
+                        <button id="tabFollowing" onclick="switchFeedTab('following')">👥 关注动态</button>
+                    </div>
                     <div id="postList"><div class="loading">加载中...</div></div>
                     <div id="pagination" class="pagination"></div>
                 </div>
@@ -344,6 +397,10 @@
             <div class="sidebar">
                 <div class="card" id="sidebarUserCard">
                     <p style="color: var(--text-secondary); font-size: 14px;">请登录后查看个人信息</p>
+                </div>
+                <div class="card" id="hotRankCard">
+                    <h2 style="font-size: 15px; display: flex; align-items: center; gap: 6px;">🔥 热度榜</h2>
+                    <div id="hotRankList"><div class="loading">加载中...</div></div>
                 </div>
             </div>
         </div>
@@ -410,8 +467,18 @@
 
         <!-- ====== 我的主页 ====== -->
         <div id="page-my-profile" class="page">
-            <div class="card" style="max-width: 700px; margin: 0 auto;" id="myProfileCard">
-                <div class="loading">加载中...</div>
+            <div style="max-width: 700px; margin: 0 auto;">
+                <div class="card" id="myProfileCard">
+                    <div class="loading">加载中...</div>
+                </div>
+                <div class="card">
+                    <div class="feed-tabs">
+                        <button id="myTabPosts" class="active" onclick="switchMyProfileTab('posts')">📝 我的帖子</button>
+                        <button id="myTabFollowing" onclick="switchMyProfileTab('following')">👥 关注</button>
+                        <button id="myTabFollowers" onclick="switchMyProfileTab('followers')">🧑‍🤝‍🧑 粉丝</button>
+                    </div>
+                    <div id="myProfileTabContent"></div>
+                </div>
             </div>
         </div>
 
@@ -483,7 +550,10 @@
         let currentPostId = null;
         let currentViewUserId = null;
         let feedPage = 1;
+        let feedTab = 'latest'; // 'latest' | 'following'
+        let myProfileTab = 'posts'; // 'posts' | 'following' | 'followers'
         let myRole = 0;
+        let myProfileData = null;
 
         // ===================== 工具函数 =====================
         function getBaseUrl() {
@@ -753,9 +823,23 @@
         }
 
         // ===================== 帖子列表 =====================
+        function switchFeedTab(tab) {
+            feedTab = tab;
+            feedPage = 1;
+            document.getElementById('tabLatest').classList.toggle('active', tab === 'latest');
+            document.getElementById('tabFollowing').classList.toggle('active', tab === 'following');
+            loadFeed();
+        }
+
         async function loadFeed(page) {
             if (page !== undefined) feedPage = page;
             updateSidebar();
+            loadHotRank();
+
+            if (feedTab === 'following') {
+                await loadFollowingFeed();
+                return;
+            }
 
             const res = await request(`/account/protected/posts?page=${feedPage}`, 'GET');
             const listEl = document.getElementById('postList');
@@ -767,7 +851,32 @@
                 return;
             }
 
-            listEl.innerHTML = res.data.map(post => `
+            renderPostList(res.data, listEl);
+            renderPagination(res.data, pageEl);
+        }
+
+        async function loadFollowingFeed() {
+            if (!isLoggedIn()) {
+                document.getElementById('postList').innerHTML = '<div class="loading">请先登录查看关注动态</div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            const res = await request(`/account/protected/following_post?page=${feedPage}`, 'GET');
+            const listEl = document.getElementById('postList');
+            const pageEl = document.getElementById('pagination');
+
+            if (!res || !res.data || typeof res.data === 'string' || res.data.length === 0) {
+                listEl.innerHTML = '<div class="loading">暂无关注动态，去关注一些人吧~</div>';
+                pageEl.innerHTML = '';
+                return;
+            }
+
+            renderPostList(res.data, listEl);
+            renderPagination(res.data, pageEl);
+        }
+
+        function renderPostList(posts, container) {
+            container.innerHTML = posts.map(post => `
                 <div class="post-item" onclick="navigateTo('post-detail', ${post.post_id})">
                     <div class="post-meta">
                         <img src="${resolveAvatar(post.avatar)}" alt="">
@@ -781,12 +890,13 @@
                     </div>
                 </div>
             `).join('');
+        }
 
-            // 简单分页
-            pageEl.innerHTML = `
+        function renderPagination(data, container) {
+            container.innerHTML = `
                 ${feedPage > 1 ? `<button class="small ghost" onclick="loadFeed(${feedPage - 1})">上一页</button>` : ''}
                 <span style="padding: 8px; font-size: 14px;">第 ${feedPage} 页</span>
-                ${res.data.length >= 10 ? `<button class="small ghost" onclick="loadFeed(${feedPage + 1})">下一页</button>` : ''}
+                ${data.length >= 10 ? `<button class="small ghost" onclick="loadFeed(${feedPage + 1})">下一页</button>` : ''}
             `;
         }
 
@@ -816,6 +926,34 @@
                     </ul>
                 `;
             }
+        }
+
+        // ===================== 热度榜 =====================
+        async function loadHotRank() {
+            const el = document.getElementById('hotRankList');
+            if (!isLoggedIn()) {
+                el.innerHTML = '<p style="color: var(--text-secondary); font-size: 13px;">登录后查看热度榜</p>';
+                return;
+            }
+            const res = await request('/account/protected/hot_rank', 'GET');
+            if (!res || !res.data || res.data.length === 0) {
+                el.innerHTML = '<p style="color: var(--text-secondary); font-size: 13px;">暂无热门帖子</p>';
+                return;
+            }
+            el.innerHTML = res.data.map((item, idx) => {
+                const p = item.post;
+                const score = Math.round(item.score * 10) / 10;
+                const rankClass = idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : 'normal';
+                return `
+                    <div class="hot-rank-item" onclick="navigateTo('post-detail', ${p.post_id})">
+                        <div class="rank-num ${rankClass}">${idx + 1}</div>
+                        <div class="rank-info">
+                            <div class="rank-title">${escapeHtml(p.title)}</div>
+                            <div class="rank-score">🔥 ${score} &nbsp; 👀${p.view_count || 0} 👍${p.like_count || 0} 💬${p.comment_count || 0}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // ===================== 发帖 =====================
@@ -868,6 +1006,7 @@
                 <div class="post-content rich-content">${renderRichContent(p.content)}</div>
                 <div class="post-actions">
                     <button class="small ghost" onclick="navigateTo('feed')">← 返回列表</button>
+                    ${isLoggedIn() ? `<button class="small ghost like-btn" id="likeBtn" onclick="doToggleLike(${p.post_id})">👍 点赞 <span id="likeCount">${p.like_count || 0}</span></button>` : ''}
                     ${canDelete ? `<button class="small ghost-danger" onclick="doDeletePost(${p.post_id})">🗑 删除帖子</button>` : ''}
                 </div>
             `;
@@ -897,7 +1036,10 @@
                 <div style="text-align: center;">
                     <img src="${resolveAvatar(p.avatar)}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; cursor: pointer;" onclick="navigateTo('user-profile', ${p.user_id})">
                     <p style="font-weight: 600; margin-top: 8px;">${escapeHtml(p.name)}</p>
-                    <button class="small ghost" style="margin-top: 8px;" onclick="navigateTo('user-profile', ${p.user_id})">查看主页</button>
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+                        <button class="small ghost" onclick="navigateTo('user-profile', ${p.user_id})">查看主页</button>
+                        ${isLoggedIn() ? `<button class="small ghost follow-btn" id="postFollowBtn" onclick="doFollowFromPost(${p.user_id})">➕ 关注</button>` : ''}
+                    </div>
                 </div>
             `;
 
@@ -940,6 +1082,61 @@
             }
         }
 
+        // ===================== 点赞 =====================
+        async function doToggleLike(postId) {
+            if (!isLoggedIn()) return showToast('请先登录', 'error');
+            const res = await request(`/account/protected/posts/${postId}/like`, 'POST');
+            if (res && res.data) {
+                const likeBtn = document.getElementById('likeBtn');
+                const likeCount = document.getElementById('likeCount');
+                if (likeBtn) {
+                    if (res.data.isLike) {
+                        likeBtn.classList.add('liked');
+                        likeBtn.innerHTML = `❤️ 已赞 <span id="likeCount">${res.data.count}</span>`;
+                    } else {
+                        likeBtn.classList.remove('liked');
+                        likeBtn.innerHTML = `👍 点赞 <span id="likeCount">${res.data.count}</span>`;
+                    }
+                }
+                showToast(res.data.isLike ? '点赞成功' : '已取消点赞', 'success');
+            }
+        }
+
+        // ===================== 关注 =====================
+        async function doFollow(userId) {
+            if (!isLoggedIn()) return showToast('请先登录', 'error');
+            const res = await request(`/account/protected/follow/${userId}`, 'POST');
+            if (res && res.data !== undefined) {
+                const isFollow = res.data.isFollow;
+                showToast(isFollow ? '关注成功' : '已取关', 'success');
+                return isFollow;
+            }
+            return null;
+        }
+
+        async function doFollowFromPost(userId) {
+            const isFollow = await doFollow(userId);
+            if (isFollow !== null) {
+                const btn = document.getElementById('postFollowBtn');
+                if (btn) {
+                    if (isFollow) {
+                        btn.classList.add('following');
+                        btn.textContent = '✅ 已关注';
+                    } else {
+                        btn.classList.remove('following');
+                        btn.textContent = '➕ 关注';
+                    }
+                }
+            }
+        }
+
+        async function doFollowFromProfile(userId) {
+            const isFollow = await doFollow(userId);
+            if (isFollow !== null) {
+                loadUserProfile(); // 刷新整个页面
+            }
+        }
+
         // ===================== 用户主页 (其他人) =====================
         async function loadUserProfile(userId) {
             if (userId !== undefined) currentViewUserId = userId;
@@ -976,6 +1173,10 @@
                         <p>${escapeHtml(u.introduction) || '这个人很懒，什么都没写'}</p>
                     </div>
                 </div>
+                <div style="margin: 12px 0; display: flex; gap: 8px; align-items: center;">
+                    ${isLoggedIn() ? `<button class="small ghost follow-btn" onclick="doFollowFromProfile(${currentViewUserId})">➕ 关注</button>` : ''}
+                    <button class="small ghost" onclick="navigateTo('feed')">← 返回</button>
+                </div>
                 ${adminActions}
                 <h3 style="margin: 16px 0 12px;">📝 Ta的帖子 (${(u.posts || []).length})</h3>
                 ${(u.posts || []).length === 0 ? '<p style="color: var(--text-secondary);">暂无帖子</p>' :
@@ -990,9 +1191,6 @@
                         </div>
                     `).join('')
                 }
-                <div style="margin-top: 16px;">
-                    <button class="small ghost" onclick="navigateTo('feed')">← 返回</button>
-                </div>
             `;
         }
 
@@ -1009,6 +1207,7 @@
 
             const u = res.data;
             myRole = u.role || 0;
+            myProfileData = u;
             card.innerHTML = `
                 <div class="profile-header">
                     <img src="${resolveAvatar(u.avatar)}">
@@ -1025,9 +1224,33 @@
                     <button class="small ghost" onclick="navigateTo('settings')">✏️ 编辑资料</button>
                     <button class="small success" onclick="navigateTo('create-post')">✍️ 发帖</button>
                 </div>
-                <h3 style="margin: 16px 0 12px;">📝 我的帖子 (${(u.posts || []).length})</h3>
-                ${(u.posts || []).length === 0 ? '<p style="color: var(--text-secondary);">暂无帖子，去发布一篇吧~</p>' :
-                    (u.posts || []).map(post => `
+            `;
+
+            // 默认显示帖子 tab
+            myProfileTab = 'posts';
+            document.getElementById('myTabPosts').classList.add('active');
+            document.getElementById('myTabFollowing').classList.remove('active');
+            document.getElementById('myTabFollowers').classList.remove('active');
+            renderMyProfileTabContent();
+        }
+
+        function switchMyProfileTab(tab) {
+            myProfileTab = tab;
+            document.getElementById('myTabPosts').classList.toggle('active', tab === 'posts');
+            document.getElementById('myTabFollowing').classList.toggle('active', tab === 'following');
+            document.getElementById('myTabFollowers').classList.toggle('active', tab === 'followers');
+            renderMyProfileTabContent();
+        }
+
+        async function renderMyProfileTabContent() {
+            const container = document.getElementById('myProfileTabContent');
+
+            if (myProfileTab === 'posts') {
+                const u = myProfileData;
+                if (!u || (u.posts || []).length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-secondary); padding: 16px 0;">暂无帖子，去发布一篇吧~</p>';
+                } else {
+                    container.innerHTML = (u.posts || []).map(post => `
                         <div class="post-item" onclick="navigateTo('post-detail', ${post.post_id})">
                             <div class="post-title">${escapeHtml(post.title)}</div>
                             <div class="post-stats">
@@ -1036,9 +1259,38 @@
                                 <span>💬 ${post.comment_count || 0}</span>
                             </div>
                         </div>
-                    `).join('')
+                    `).join('');
                 }
-            `;
+            } else if (myProfileTab === 'following') {
+                container.innerHTML = '<div class="loading">加载中...</div>';
+                const res = await request('/account/protected/following', 'GET');
+                if (!res || !res.data || typeof res.data === 'string') {
+                    container.innerHTML = '<p style="color: var(--text-secondary); padding: 16px 0;">还没有关注的人~</p>';
+                } else {
+                    container.innerHTML = renderFollowList(res.data);
+                }
+            } else if (myProfileTab === 'followers') {
+                container.innerHTML = '<div class="loading">加载中...</div>';
+                const res = await request('/account/protected/follow', 'GET');
+                if (!res || !res.data || typeof res.data === 'string') {
+                    container.innerHTML = '<p style="color: var(--text-secondary); padding: 16px 0;">还没有粉丝~</p>';
+                } else {
+                    container.innerHTML = renderFollowList(res.data);
+                }
+            }
+        }
+
+        function renderFollowList(users) {
+            return users.map(u => `
+                <div class="follow-list-item">
+                    <img src="${resolveAvatar(u.avatar)}" onclick="navigateTo('user-profile', ${u.user_id})">
+                    <div class="follow-info">
+                        <div class="follow-name" onclick="navigateTo('user-profile', ${u.user_id})">${escapeHtml(u.name)}</div>
+                        <div class="follow-intro">${escapeHtml(u.introduction) || '这个人很懒，什么都没写'}</div>
+                    </div>
+                    <button class="small ghost" onclick="navigateTo('user-profile', ${u.user_id})">查看</button>
+                </div>
+            `).join('');
         }
 
         // ===================== 设置页 =====================
