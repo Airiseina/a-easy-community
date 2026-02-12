@@ -1133,7 +1133,16 @@
         async function doFollowFromProfile(userId) {
             const isFollow = await doFollow(userId);
             if (isFollow !== null) {
-                loadUserProfile(); // 刷新整个页面
+                const btn = document.getElementById('profileFollowBtn');
+                if (btn) {
+                    if (isFollow) {
+                        btn.classList.add('following');
+                        btn.textContent = '✅ 已关注';
+                    } else {
+                        btn.classList.remove('following');
+                        btn.textContent = '➕ 关注';
+                    }
+                }
             }
         }
 
@@ -1174,7 +1183,7 @@
                     </div>
                 </div>
                 <div style="margin: 12px 0; display: flex; gap: 8px; align-items: center;">
-                    ${isLoggedIn() ? `<button class="small ghost follow-btn" onclick="doFollowFromProfile(${currentViewUserId})">➕ 关注</button>` : ''}
+                    ${isLoggedIn() ? `<button class="small ghost follow-btn" id="profileFollowBtn" onclick="doFollowFromProfile(${currentViewUserId})">➕ 关注</button>` : ''}
                     <button class="small ghost" onclick="navigateTo('feed')">← 返回</button>
                 </div>
                 ${adminActions}
