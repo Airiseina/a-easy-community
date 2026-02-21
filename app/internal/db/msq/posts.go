@@ -3,6 +3,7 @@ package msq
 import (
 	"commmunity/app/internal/model"
 	"commmunity/app/zlog"
+	"errors"
 	"time"
 
 	"go.uber.org/zap"
@@ -55,6 +56,10 @@ func (db Gorm) GetPostDetail(postID uint) (model.Post, error) {
 		Preload("Comments.User.UserProfile").
 		First(&post, postID).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			zlog.Warn("未找到该文章")
+			return model.Post{}, nil
+		}
 		zlog.Error("查询文章失败", zap.Error(err))
 		return model.Post{}, err
 	}
@@ -120,6 +125,10 @@ func (db Gorm) GetCommentDetail(commentID uint) (model.Comment, error) {
 	var comment model.Comment
 	err := db.db.Preload("User").Preload("User.UserProfile").First(&comment, commentID).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			zlog.Warn("未找到相关数据")
+			return model.Comment{}, nil
+		}
 		zlog.Error("查询失败", zap.Error(err))
 		return model.Comment{}, err
 	}
@@ -198,4 +207,33 @@ func (db Gorm) HotPosts(postIds []uint) ([]model.Post, error) {
 		return nil, err
 	}
 	return posts, nil
+}
+
+func (db Gorm) SearchPosts(keyword string, offset int, pageSize int) ([]model.Post, error) {
+	var posts []model.Post
+	if keyword == "" {
+		zlog.Error("搜索不可为空")
+		return nil, errors.New("搜索不可为空")
+	}
+	err := db.db.Where("MATCH (title, content) AGAINST (? IN NATURAL LANGUAGE MODE)", keyword).
+		Preload("User").
+		Preload("User.UserProfile").
+		Select("id, user_id, title, content, created_at, view_count, like_count, comment_count").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&posts).Error
+	if err != nil {
+		zlog.Error("搜索帖子失败", zap.Error(err))
+		return nil, err
+	}
+	return posts, nil
+}
+
+func (db Gorm) SetPostPaid(postId uint, isPaid bool) error {
+	err := db.db.Model(&model.Post{}).Select("paid").Where("id = ?", postId).Update("paid", isPaid).Error
+	if err != nil {
+		zlog.Error("更新付费文章失败", zap.Error(err))
+		return err
+	}
+	return nil
 }

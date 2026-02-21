@@ -2,8 +2,12 @@ package red
 
 import (
 	"commmunity/app/internal/model"
+	"commmunity/app/utils"
 	"commmunity/app/zlog"
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -121,4 +125,102 @@ func (rdb Redis) GetHotRank() ([]redis.Z, error) {
 		return nil, err
 	}
 	return results, err
+}
+
+func (rdb Redis) SetPostCache(postId uint, postDetail interface{}) error {
+	key := fmt.Sprintf("post:cache:%d", postId)
+	data, err := json.Marshal(postDetail)
+	if err != nil {
+		zlog.Error("JSON序列化失败", zap.Error(err))
+		return err
+	}
+	expiration := 1*time.Hour + utils.RandomDuration(5)
+	if string(data) == "{}" {
+		expiration = 5*time.Minute + utils.RandomDuration(1)
+	}
+	err = rdb.redis.Set(rdb.context, key, data, expiration).Err()
+	if err != nil {
+		zlog.Error("建立文章缓存失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (rdb Redis) GetPostCache(postId uint) (string, error) {
+	key := fmt.Sprintf("post:cache:%d", postId)
+	data, err := rdb.redis.Get(rdb.context, key).Result()
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			zlog.Error("获取文章缓存失败", zap.Error(err))
+			return "", err
+		}
+		return "", nil
+	}
+	return data, nil
+}
+
+func (rdb Redis) DelPostCache(postId uint) error {
+	key := fmt.Sprintf("post:cache:%d", postId)
+	err := rdb.redis.Del(rdb.context, key).Err()
+	if err != nil {
+		zlog.Error("删除文章缓存失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (rdb Redis) GetPostListCache(offset, pageSize int) (string, error) {
+	key := fmt.Sprintf("post:list:%d:%d", offset, pageSize)
+	data, err := rdb.redis.Get(rdb.context, key).Result()
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			zlog.Error("获取文章列表缓存失败", zap.Error(err))
+			return "", err
+		}
+		return "", nil
+	}
+	return data, nil
+}
+
+func (rdb Redis) SetPostListCache(offset, pageSize int, posts interface{}) error {
+	key := fmt.Sprintf("post:list:%d:%d", offset, pageSize)
+	data, err := json.Marshal(posts)
+	if err != nil {
+		zlog.Error("JSON序列化失败", zap.Error(err))
+		return err
+	}
+	err = rdb.redis.Set(rdb.context, key, data, 5*time.Minute+utils.RandomDuration(1)).Err()
+	if err != nil {
+		zlog.Error("建立文章列表缓存失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (rdb Redis) SetFollowingPostsCache(account string, offset, pageSize int, posts interface{}) error {
+	key := fmt.Sprintf("following:posts:%s:%d:%d", account, offset, pageSize)
+	data, err := json.Marshal(posts)
+	if err != nil {
+		zlog.Error("JSON序列化失败", zap.Error(err))
+		return err
+	}
+	err = rdb.redis.Set(rdb.context, key, data, 3*time.Minute+utils.RandomDuration(1)).Err()
+	if err != nil {
+		zlog.Error("建立动态列表缓存失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (rdb Redis) GetFollowingPostsCache(account string, offset, pageSize int) (string, error) {
+	key := fmt.Sprintf("following:posts:%s:%d:%d", account, offset, pageSize)
+	data, err := rdb.redis.Get(rdb.context, key).Result()
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			zlog.Error("获取动态列表缓存失败", zap.Error(err))
+			return "", err
+		}
+		return "", nil
+	}
+	return data, nil
 }

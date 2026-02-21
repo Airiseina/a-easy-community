@@ -3,7 +3,10 @@ package utils
 import (
 	"commmunity/app/zlog"
 	"errors"
+	"math/rand"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/spf13/viper"
@@ -84,4 +87,33 @@ func ParseRefreshToken(tokenString string) (*MyClaims, error) {
 	}
 	zlog.Error("refreshToken已过期")
 	return nil, errors.New("refreshToken已过期")
+}
+
+func RandomDuration(rt int) time.Duration {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	randTime := time.Duration(r.Intn(rt)) * time.Minute
+	return randTime
+}
+
+func TruncateContent(content string, maxLines int, maxChars int) string {
+	lines := strings.Split(content, "\n")
+	var resultBuilder strings.Builder
+	charCount := 0
+	for i, line := range lines {
+		if i >= maxLines {
+			break
+		}
+		if strings.Contains(line, "![") || strings.Contains(line, "<img") {
+			continue
+		}
+		lineLen := utf8.RuneCountInString(line)
+		if charCount+lineLen > maxChars {
+			break
+		}
+		resultBuilder.WriteString(line)
+		resultBuilder.WriteString("\n")
+		charCount += lineLen
+	}
+	resultBuilder.WriteString("\n\n> 🔒 **剩余内容为付费会员专享，请升级后查看...**")
+	return resultBuilder.String()
 }

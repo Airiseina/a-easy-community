@@ -8,6 +8,7 @@ import (
 	"commmunity/app/utils"
 	"commmunity/app/zlog"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -71,6 +72,7 @@ func Login(c *gin.Context) {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
 	}
+	c.SetSameSite(http.SameSiteStrictMode) //防csrf
 	c.SetCookie(
 		"refresh_token",
 		refreshToken,
@@ -87,8 +89,11 @@ func GetProfile(c *gin.Context) {
 	account := c.GetString("account")
 	info, err := login.GetProfile(account)
 	if err != nil {
-		response.Fail(c)
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
+	}
+	if info.Account == "" {
+		response.Fail(c)
 	}
 	response.OkWithData(c, info)
 }

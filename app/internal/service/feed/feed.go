@@ -1,14 +1,25 @@
 package feed
 
-import "commmunity/app/internal/db/global"
+import (
+	"commmunity/app/internal/db/global"
+	"encoding/json"
+)
 
 func Follow(account string, followedId uint) (error, bool) {
-	followed, err := global.User.GetUserId(account)
+	follower, err := global.User.GetUserId(account)
 	if err != nil {
 		return err, false
 	}
-	followerId := followed.ID
+	followerId := follower.ID
 	flag, err := global.User.IsFollowing(followedId, followerId)
+	if err != nil {
+		return err, false
+	}
+	err = global.UserRedis.DelFollowersCache(account)
+	if err != nil {
+		return err, false
+	}
+	err = global.UserRedis.DelFollowingsCache(account)
 	if err != nil {
 		return err, false
 	}
@@ -35,6 +46,19 @@ type FollowsDTO struct {
 }
 
 func GetFollowers(account string) ([]FollowsDTO, error) {
+	fc, err := global.UserRedis.GetFollowersCache(account)
+	if err != nil {
+		return nil, err
+	}
+	if fc == "[]" {
+		return []FollowsDTO{}, nil
+	}
+	if fc != "" {
+		var cached []FollowsDTO
+		if err = json.Unmarshal([]byte(fc), &cached); err == nil {
+			return cached, nil
+		}
+	}
 	var followersDTO []FollowsDTO
 	user, err := global.User.GetUserId(account)
 	if err != nil {
@@ -53,10 +77,34 @@ func GetFollowers(account string) ([]FollowsDTO, error) {
 		}
 		followersDTO = append(followersDTO, followerDTO)
 	}
+	if len(followersDTO) == 0 {
+		err = global.UserRedis.SetFollowersCache(account, []FollowsDTO{})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = global.UserRedis.SetFollowersCache(account, followersDTO)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return followersDTO, nil
 }
 
 func GetFollowings(account string) ([]FollowsDTO, error) {
+	fc, err := global.UserRedis.GetFollowingsCache(account)
+	if err != nil {
+		return nil, err
+	}
+	if fc == "[]" {
+		return []FollowsDTO{}, nil
+	}
+	if fc != "" {
+		var cached []FollowsDTO
+		if err = json.Unmarshal([]byte(fc), &cached); err == nil {
+			return cached, nil
+		}
+	}
 	var followingsDTO []FollowsDTO
 	user, err := global.User.GetUserId(account)
 	if err != nil {
@@ -75,6 +123,19 @@ func GetFollowings(account string) ([]FollowsDTO, error) {
 		}
 		followingsDTO = append(followingsDTO, followingDTO)
 	}
+
+	if len(followingsDTO) == 0 {
+		err = global.UserRedis.SetFollowingsCache(account, []FollowsDTO{})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = global.UserRedis.SetFollowingsCache(account, followingsDTO)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return followingsDTO, nil
 }
 
@@ -89,6 +150,19 @@ type PostsDTO struct {
 }
 
 func GetFollowingPosts(account string, offset int, pageSize int) ([]PostsDTO, error) {
+	fpc, err := global.PostRedis.GetFollowingPostsCache(account, offset, pageSize)
+	if err != nil {
+		return nil, err
+	}
+	if fpc == "[]" {
+		return []PostsDTO{}, nil
+	}
+	if fpc != "" {
+		var cached []PostsDTO
+		if err = json.Unmarshal([]byte(fpc), &cached); err == nil {
+			return cached, nil
+		}
+	}
 	user, err := global.User.GetUserId(account)
 	if err != nil {
 		return nil, err
@@ -107,6 +181,17 @@ func GetFollowingPosts(account string, offset int, pageSize int) ([]PostsDTO, er
 			ViewCount:    p.ViewCount,
 			LikeCount:    p.LikeCount,
 			CommentCount: p.CommentCount,
+		}
+	}
+	if len(posts) == 0 {
+		err = global.PostRedis.SetFollowingPostsCache(account, offset, pageSize, []PostsDTO{})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = global.PostRedis.SetFollowingPostsCache(account, offset, pageSize, posts)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return posts, nil

@@ -40,5 +40,15 @@ func ConnectMysql() *gorm.DB {
 		zlog.Fatal("自动迁移失败", zap.Error(err))
 	}
 	zlog.Info("自动迁移成功")
+
+	if !db.Migrator().HasIndex(&model.Post{}, "idx_fulltext_search") {
+		err = db.Exec("ALTER TABLE posts ADD FULLTEXT INDEX idx_fulltext_search (title, content) WITH PARSER ngram").Error
+		if err != nil {
+			zlog.Error("创建全文索引失败", zap.Error(err))
+		} else {
+			zlog.Info("创建全文索引成功")
+		}
+	}
+
 	return db
 }

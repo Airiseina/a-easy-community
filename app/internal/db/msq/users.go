@@ -50,7 +50,6 @@ func (db Gorm) GetUser(account string) (*model.User, error) {
 	return &user, nil
 }
 
-// 不删评论
 func (db Gorm) DeleteUser(account string) error {
 	var user model.User
 	if err := db.db.Where("account = ?", account).First(&user).Error; err != nil {
@@ -58,6 +57,7 @@ func (db Gorm) DeleteUser(account string) error {
 	}
 	return db.db.Unscoped().Select("UserProfile", "Posts").Delete(&user).Error
 }
+
 func (db Gorm) ChangePassword(account string, hash string) error {
 	user := model.User{
 		Account: account,
@@ -112,7 +112,7 @@ func (db Gorm) ChangeIntroduction(account string, introduction string) error {
 
 func (db Gorm) GetUserId(account string) (model.User, error) {
 	var user model.User
-	err := db.db.Model(&model.User{}).Preload("UserProfile").Select("id").Where("account = ?", account).First(&user).Error
+	err := db.db.Model(&model.User{}).Preload("UserProfile").Where("account = ?", account).First(&user).Error
 	if err != nil {
 		zlog.Error("查找id失败", zap.Error(err))
 		return model.User{}, err
@@ -181,4 +181,13 @@ func (db Gorm) IsFollowing(followedId uint, followerId uint) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (db Gorm) SetVip(userId uint, vip bool) error {
+	err := db.db.Model(&model.User{}).Where("id = ?", userId).Update("vip", vip).Error
+	if err != nil {
+		zlog.Error("创建vip用户失败", zap.Error(err))
+		return err
+	}
+	return nil
 }

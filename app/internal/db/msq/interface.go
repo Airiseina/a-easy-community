@@ -21,6 +21,7 @@ type UserData interface {
 	GetFollowers(userId uint) ([]model.User, error)
 	GetFollowings(userId uint) ([]model.User, error)
 	IsFollowing(followedId uint, followerId uint) (bool, error)
+	SetVip(userId uint, vip bool) error
 }
 
 type PostData interface {
@@ -37,4 +38,6 @@ type PostData interface {
 	View(postId uint, viewCount uint) error
 	RecentPosts(recentTime time.Time) ([]model.Post, error)
 	HotPosts(postIds []uint) ([]model.Post, error)
+	SearchPosts(keyword string, offset, pageSize int) ([]model.Post, error)
+	SetPostPaid(postId uint, isPaid bool) error
 }

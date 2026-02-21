@@ -246,6 +246,34 @@
         .follow-btn.following { background: #e0e0e0; color: #666; border-color: #ccc; }
         .follow-btn.following:hover { background: #ffebee; color: var(--error-color); border-color: var(--error-color); }
 
+        /* VIP 标识 */
+        .vip-badge {
+            display: inline-block; padding: 1px 6px; border-radius: 8px;
+            font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #f6d365, #fda085);
+            color: white; margin-left: 4px; vertical-align: middle;
+        }
+        /* 付费帖子标识 */
+        .paid-badge {
+            display: inline-block; padding: 1px 6px; border-radius: 8px;
+            font-size: 11px; font-weight: 600; background: #9c27b0; color: white;
+            margin-left: 4px; vertical-align: middle;
+        }
+        /* AI 总结块 */
+        .ai-summary-block {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border: 1px solid #ce93d8; border-radius: 8px;
+            padding: 14px 16px; margin: 16px 0;
+        }
+        .ai-summary-block .ai-summary-title {
+            font-size: 13px; font-weight: 700; color: #7b1fa2; margin-bottom: 8px;
+        }
+        .ai-summary-block .ai-summary-content {
+            font-size: 14px; line-height: 1.7; color: #333; white-space: pre-wrap;
+        }
+        .ai-summary-block .ai-summary-loading {
+            font-size: 13px; color: #999;
+        }
+
         /* Tab 切换栏 */
         .feed-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--border-color); }
         .feed-tabs button {
@@ -344,6 +372,12 @@
     <!-- 顶部导航 -->
     <nav class="navbar">
         <div class="logo" onclick="navigateTo('feed')" style="cursor:pointer;">💬 社区</div>
+        <div style="flex: 1; max-width: 400px; margin: 0 20px;">
+            <div style="display: flex; gap: 6px;">
+                <input type="text" id="searchInput" placeholder="🔍 搜索帖子..." style="margin: 0; font-size: 13px; padding: 6px 12px;" onkeydown="if(event.key==='Enter') doSearch()">
+                <button class="small" onclick="doSearch()">搜索</button>
+            </div>
+        </div>
         <div class="nav-right">
             <!-- 未登录 -->
             <div id="navGuest">
@@ -389,6 +423,11 @@
                     <div class="feed-tabs">
                         <button id="tabLatest" class="active" onclick="switchFeedTab('latest')">📰 最新帖子</button>
                         <button id="tabFollowing" onclick="switchFeedTab('following')">👥 关注动态</button>
+                        <button id="tabSearch" onclick="switchFeedTab('search')">🔍 搜索结果</button>
+                    </div>
+                    <div id="searchBarInFeed" class="hidden" style="margin-bottom: 12px; display: flex; gap: 8px;">
+                        <input type="text" id="searchKeywordInFeed" placeholder="输入关键词搜索..." onkeydown="if(event.key==='Enter') doSearchInFeed()">
+                        <button onclick="doSearchInFeed()">搜索</button>
                     </div>
                     <div id="postList"><div class="loading">加载中...</div></div>
                     <div id="pagination" class="pagination"></div>
@@ -517,13 +556,23 @@
                     <h2>⚠️ 危险操作</h2>
                     <button onclick="doDeleteUser()" class="danger">注销账号</button>
                 </div>
-                <div class="card" id="adminPanel" class="hidden">
+                <div class="card" id="adminPanel" style="display:none;">
                     <h2>🛡️ 管理员操作</h2>
                     <h3>禁言/解禁用户</h3>
                     <div class="form-row">
                         <input type="text" id="muteUserId" placeholder="用户ID (数字)">
                         <button onclick="doMute(true)">禁言</button>
                         <button onclick="doMute(false)" class="ghost">解禁</button>
+                    </div>
+                    <h3>设置/取消 VIP</h3>
+                    <div class="form-row">
+                        <input type="text" id="vipUserId" placeholder="用户ID (数字)">
+                        <button onclick="doSetVip()" class="success">授予 VIP</button>
+                    </div>
+                    <h3>设置付费帖子</h3>
+                    <div class="form-row">
+                        <input type="text" id="paidPostId" placeholder="帖子ID (数字)">
+                        <button onclick="doSetPaidPost()">设为付费</button>
                     </div>
                 </div>
             </div>
@@ -550,10 +599,12 @@
         let currentPostId = null;
         let currentViewUserId = null;
         let feedPage = 1;
-        let feedTab = 'latest'; // 'latest' | 'following'
+        let feedTab = 'latest'; // 'latest' | 'following' | 'search'
         let myProfileTab = 'posts'; // 'posts' | 'following' | 'followers'
         let myRole = 0;
+        let myVip = false;
         let myProfileData = null;
+        let searchKeyword = '';
 
         // ===================== 工具函数 =====================
         function getBaseUrl() {
@@ -798,10 +849,8 @@
 
             const res = await request('/account/login', 'POST', { account, password });
             if (res) {
-                let token = '';
-                if (typeof res.data === 'string') token = res.data;
-                else if (res.data && res.data.token) token = res.data.token;
-
+                // 后端统一返回 { token: "..." }
+                const token = res.data && res.data.token ? res.data.token : '';
                 if (token) {
                     localStorage.setItem('token', token);
                     updateNavbar();
@@ -828,6 +877,16 @@
             feedPage = 1;
             document.getElementById('tabLatest').classList.toggle('active', tab === 'latest');
             document.getElementById('tabFollowing').classList.toggle('active', tab === 'following');
+            document.getElementById('tabSearch').classList.toggle('active', tab === 'search');
+            // 搜索栏：仅在搜索 tab 下显示
+            const searchBar = document.getElementById('searchBarInFeed');
+            if (tab === 'search') {
+                searchBar.classList.remove('hidden');
+                searchBar.style.display = 'flex';
+            } else {
+                searchBar.classList.add('hidden');
+                searchBar.style.display = 'none';
+            }
             loadFeed();
         }
 
@@ -838,6 +897,11 @@
 
             if (feedTab === 'following') {
                 await loadFollowingFeed();
+                return;
+            }
+
+            if (feedTab === 'search') {
+                await loadSearchFeed();
                 return;
             }
 
@@ -875,12 +939,57 @@
             renderPagination(res.data, pageEl);
         }
 
+        // 从导航栏搜索框触发
+        function doSearch() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) return showToast('请输入搜索关键词', 'error');
+            searchKeyword = keyword;
+            document.getElementById('searchKeywordInFeed').value = keyword;
+            switchFeedTab('search');
+            navigateTo('feed');
+        }
+
+        // 从 Feed 页内搜索栏触发
+        function doSearchInFeed() {
+            const keyword = document.getElementById('searchKeywordInFeed').value.trim();
+            if (!keyword) return showToast('请输入搜索关键词', 'error');
+            searchKeyword = keyword;
+            document.getElementById('searchInput').value = keyword;
+            feedPage = 1;
+            loadFeed();
+        }
+
+        async function loadSearchFeed() {
+            const listEl = document.getElementById('postList');
+            const pageEl = document.getElementById('pagination');
+
+            if (!searchKeyword) {
+                listEl.innerHTML = '<div class="loading">请输入关键词进行搜索</div>';
+                pageEl.innerHTML = '';
+                return;
+            }
+
+            listEl.innerHTML = '<div class="loading">搜索中...</div>';
+
+            const res = await request(`/account/protected/search?keyword=${encodeURIComponent(searchKeyword)}&page=${feedPage}`, 'GET');
+
+            if (!res || !res.data || typeof res.data === 'string' || res.data.length === 0) {
+                listEl.innerHTML = `<div class="loading">未找到与「${escapeHtml(searchKeyword)}」相关的帖子</div>`;
+                pageEl.innerHTML = '';
+                return;
+            }
+
+            renderPostList(res.data, listEl);
+            renderPagination(res.data, pageEl);
+        }
+
         function renderPostList(posts, container) {
             container.innerHTML = posts.map(post => `
                 <div class="post-item" onclick="navigateTo('post-detail', ${post.post_id})">
                     <div class="post-meta">
                         <img src="${resolveAvatar(post.avatar)}" alt="">
                         <span class="author-name" onclick="event.stopPropagation()">${escapeHtml(post.name)}</span>
+                        ${post.paid ? '<span class="paid-badge">💎 付费</span>' : ''}
                     </div>
                     <div class="post-title">${escapeHtml(post.title)}</div>
                     <div class="post-stats">
@@ -910,12 +1019,14 @@
             if (res && res.data) {
                 const u = res.data;
                 myRole = u.role || 0;
+                myVip = !!u.vip;
+                const roleLabel = u.role === 1 ? '🛡️ 管理员' : (u.vip ? '⭐ VIP' : '👤 用户');
                 el.innerHTML = `
                     <div class="user-card" onclick="navigateTo('my-profile')" style="cursor:pointer;">
                         <img src="${resolveAvatar(u.avatar)}">
                         <div>
-                            <div class="name">${escapeHtml(u.name)}</div>
-                            <div class="role">${u.role === 1 ? '🛡️ 管理员' : '👤 用户'} ${u.isMuted ? '🔇 已禁言' : ''}</div>
+                            <div class="name">${escapeHtml(u.name)}${u.vip ? '<span class="vip-badge">VIP</span>' : ''}</div>
+                            <div class="role">${roleLabel} ${u.isMuted ? '🔇 已禁言' : ''}</div>
                         </div>
                     </div>
                     <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">${escapeHtml(u.introduction) || '这个人很懒，什么都没写'}</p>
@@ -988,11 +1099,29 @@
             }
 
             const p = res.data;
-            const canDelete = isLoggedIn(); // 具体权限后端会判断
+            const canDelete = isLoggedIn();
+            const isPaid = !!p.paid;
+            const isContentTruncated = isPaid && !myVip;
+
+            // 付费帖子提示
+            const paidNotice = isContentTruncated ? `
+                <div style="background:#f3e5f5;border:1px solid #ce93d8;border-radius:8px;padding:14px 16px;margin:12px 0;text-align:center;">
+                    <p style="font-weight:700;color:#7b1fa2;margin-bottom:8px;">💎 付费内容</p>
+                    <p style="font-size:13px;color:#555;">此帖子为付费内容，以下仅展示部分内容。<br>成为 VIP 后可查看完整内容（请联系管理员）。</p>
+                </div>
+            ` : '';
+
+            // AI 总结区域（仅 VIP 可用）
+            const aiSummarySection = isLoggedIn() ? `
+                <div class="ai-summary-block" id="aiSummaryBlock" style="display:none;">
+                    <div class="ai-summary-title">🤖 AI 智能总结</div>
+                    <div class="ai-summary-content" id="aiSummaryContent"></div>
+                </div>
+            ` : '';
 
             card.innerHTML = `
                 <div class="post-header">
-                    <h1>${escapeHtml(p.title)}</h1>
+                    <h1>${escapeHtml(p.title)}${isPaid ? '<span class="paid-badge">💎 付费</span>' : ''}</h1>
                     <div class="post-author">
                         <img src="${resolveAvatar(p.avatar)}" onclick="navigateTo('user-profile', ${p.user_id})">
                         <div class="info">
@@ -1003,15 +1132,29 @@
                         </div>
                     </div>
                 </div>
+                ${paidNotice}
                 <div class="post-content rich-content">${renderRichContent(p.content)}</div>
+                ${aiSummarySection}
                 <div class="post-actions">
                     <button class="small ghost" onclick="navigateTo('feed')">← 返回列表</button>
                     ${isLoggedIn() ? `<button class="small ghost like-btn" id="likeBtn" onclick="doToggleLike(${p.post_id})">👍 点赞 <span id="likeCount">${p.like_count || 0}</span></button>` : ''}
+                    ${myVip ? `<button class="small ghost" id="aiSummaryBtn" onclick="doAiSummary(${p.post_id})" style="background:linear-gradient(135deg,#e040fb,#7c4dff);color:white;border:none;">✨ AI总结</button>` : ''}
                     ${canDelete ? `<button class="small ghost-danger" onclick="doDeletePost(${p.post_id})">🗑 删除帖子</button>` : ''}
+                    ${myRole === 1 ? `<button class="small" onclick="doSetPaidPostFromDetail(${p.post_id})" style="background:#9c27b0;">💎 设付费</button>` : ''}
                 </div>
             `;
 
-            // 评论列表
+            // 如果已有 AI 总结则直接显示（来自缓存）
+            if (p.ai_summary) {
+                const block = document.getElementById('aiSummaryBlock');
+                const content = document.getElementById('aiSummaryContent');
+                if (block && content) {
+                    content.textContent = p.ai_summary;
+                    block.style.display = 'block';
+                }
+            }
+
+            // 评论列表（字段: user_name, user_avatar, user_id, id, content, created_at）
             const comments = p.comment || [];
             if (comments.length === 0) {
                 commentList.innerHTML = '<p style="color: var(--text-secondary); padding: 10px 0;">暂无评论，快来抢沙发~</p>';
@@ -1024,7 +1167,7 @@
                             <div class="comment-text rich-content">${renderRichContent(c.content)}</div>
                             <div class="comment-time">${c.created_at || ''}</div>
                             <div class="comment-actions">
-                                <button class="small ghost-danger" onclick="doDeleteComment(${c.id}, ${p.user_id})">删除</button>
+                                ${isLoggedIn() ? `<button class="small ghost-danger" onclick="doDeleteComment(${c.id})">删除</button>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1036,15 +1179,45 @@
                 <div style="text-align: center;">
                     <img src="${resolveAvatar(p.avatar)}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; cursor: pointer;" onclick="navigateTo('user-profile', ${p.user_id})">
                     <p style="font-weight: 600; margin-top: 8px;">${escapeHtml(p.name)}</p>
-                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+                    <div style="display: flex; flex-direction:column; gap: 8px; align-items: center; margin-top: 10px;">
                         <button class="small ghost" onclick="navigateTo('user-profile', ${p.user_id})">查看主页</button>
                         ${isLoggedIn() ? `<button class="small ghost follow-btn" id="postFollowBtn" onclick="doFollowFromPost(${p.user_id})">➕ 关注</button>` : ''}
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary);">
+                        ${isPaid ? '<span class="paid-badge">💎 付费帖子</span>' : ''}
                     </div>
                 </div>
             `;
 
             // 未登录隐藏评论框
             document.getElementById('commentInputArea').classList.toggle('hidden', !isLoggedIn());
+        }
+
+        // ===================== AI 总结 =====================
+        async function doAiSummary(postId) {
+            if (!myVip) return showToast('AI 总结为 VIP 专属功能', 'error');
+            const btn = document.getElementById('aiSummaryBtn');
+            const block = document.getElementById('aiSummaryBlock');
+            const content = document.getElementById('aiSummaryContent');
+            if (!block || !content) return;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ 生成中...';
+            block.style.display = 'block';
+            content.innerHTML = '<span class="ai-summary-loading">🤖 AI 正在思考中，请稍候...</span>';
+
+            // 调用 AI 总结接口（POST /posts/:postId/summary）
+            const res = await request(`/account/protected/posts/${postId}/summary`, 'POST');
+            btn.disabled = false;
+            btn.textContent = '✨ AI总结';
+
+            if (res && res.data && res.data.postSummary) {
+                content.textContent = res.data.postSummary;
+                showToast('AI 总结完成', 'success');
+            } else {
+                block.style.display = 'none';
+                showToast('AI 总结失败，请确认您是 VIP 用户', 'error');
+            }
         }
 
         // ===================== 发表评论 =====================
@@ -1072,10 +1245,12 @@
         }
 
         // ===================== 删除评论 =====================
-        async function doDeleteComment(commentId, posterId) {
+        async function doDeleteComment(commentId) {
             if (!confirm('确定要删除这条评论吗？')) return;
             // 路由: DELETE /posts/:postId/:posterId/:commentId
-            const res = await request(`/account/protected/posts/${currentPostId}/${posterId}/${commentId}`, 'DELETE');
+            // posterId 参数在后端路由中定义但实际 controller 只用 commentId，
+            // 此处传入当前帖子 ID 作为 postId，用户 ID 占位符用 0
+            const res = await request(`/account/protected/posts/${currentPostId}/0/${commentId}`, 'DELETE');
             if (res) {
                 showToast('评论已删除', 'success');
                 loadPostDetail(); // 刷新
@@ -1107,6 +1282,7 @@
             if (!isLoggedIn()) return showToast('请先登录', 'error');
             const res = await request(`/account/protected/follow/${userId}`, 'POST');
             if (res && res.data !== undefined) {
+                // 后端返回 { isFollow: bool }
                 const isFollow = res.data.isFollow;
                 showToast(isFollow ? '关注成功' : '已取关', 'success');
                 return isFollow;
@@ -1167,6 +1343,7 @@
                         ? `<button class="small success" onclick="doMuteFromProfile(${currentViewUserId}, false)" style="margin-left: 8px;">🔊 解除禁言</button>`
                         : `<button class="small danger" onclick="doMuteFromProfile(${currentViewUserId}, true)" style="margin-left: 8px;">🔇 禁言该用户</button>`
                     }
+                    <button class="small" onclick="doSetVipFromProfile(${currentViewUserId})" style="margin-left: 8px; background:linear-gradient(135deg,#f6d365,#fda085);">⭐ 授予VIP</button>
                 </div>
             ` : '';
 
@@ -1203,6 +1380,15 @@
             `;
         }
 
+        // 从用户主页快捷授予 VIP
+        async function doSetVipFromProfile(userId) {
+            if (!confirm('确定要授予该用户 VIP 吗？')) return;
+            const res = await request(`/account/protected/vip/${userId}`, 'POST');
+            if (res) {
+                showToast('VIP 授予成功', 'success');
+            }
+        }
+
         // ===================== 我的主页 =====================
         async function loadMyProfile() {
             const card = document.getElementById('myProfileCard');
@@ -1216,6 +1402,7 @@
 
             const u = res.data;
             myRole = u.role || 0;
+            myVip = !!u.vip;
             myProfileData = u;
             card.innerHTML = `
                 <div class="profile-header">
@@ -1223,6 +1410,7 @@
                     <div class="info">
                         <h2>${escapeHtml(u.name)}
                             <span class="badge" style="background:${u.role === 1 ? '#ff9800' : '#2196f3'};color:white;">${u.role === 1 ? '管理员' : '用户'}</span>
+                            ${u.vip ? '<span class="vip-badge">VIP</span>' : ''}
                             ${u.isMuted ? '<span class="badge" style="background:#f44336;color:white;">已禁言</span>' : ''}
                         </h2>
                         <p>账号: ${escapeHtml(u.account)}</p>
@@ -1280,6 +1468,7 @@
                 }
             } else if (myProfileTab === 'followers') {
                 container.innerHTML = '<div class="loading">加载中...</div>';
+                // 后端路由: GET /follow 获取我的粉丝列表
                 const res = await request('/account/protected/follow', 'GET');
                 if (!res || !res.data || typeof res.data === 'string') {
                     container.innerHTML = '<p style="color: var(--text-secondary); padding: 16px 0;">还没有粉丝~</p>';
@@ -1304,12 +1493,12 @@
 
         // ===================== 设置页 =====================
         function loadSettings() {
-            // 管理员面板显示
+            // 管理员面板显示（注意 HTML 中用 style="display:none;" 而非 class）
             const adminPanel = document.getElementById('adminPanel');
             if (myRole === 1) {
-                adminPanel.classList.remove('hidden');
+                adminPanel.style.display = 'block';
             } else {
-                adminPanel.classList.add('hidden');
+                adminPanel.style.display = 'none';
             }
         }
 
@@ -1381,6 +1570,40 @@
             if (res) {
                 showToast(`已${action}`, 'success');
                 loadUserProfile(); // 刷新当前用户主页
+            }
+        }
+
+        // ===================== VIP 设置（管理员）=====================
+        async function doSetVip() {
+            const userId = document.getElementById('vipUserId').value.trim();
+            if (!userId) return showToast('请输入用户ID', 'error');
+            // 路由: POST /account/protected/vip/:Id
+            const res = await request(`/account/protected/vip/${userId}`, 'POST');
+            if (res) {
+                showToast('VIP 授予成功', 'success');
+                document.getElementById('vipUserId').value = '';
+            }
+        }
+
+        // ===================== 付费帖子设置（管理员）=====================
+        async function doSetPaidPost() {
+            const postId = document.getElementById('paidPostId').value.trim();
+            if (!postId) return showToast('请输入帖子ID', 'error');
+            // 路由: POST /account/protected/paid-post/:postId
+            const res = await request(`/account/protected/paid-post/${postId}`, 'POST');
+            if (res) {
+                showToast('已设为付费帖子', 'success');
+                document.getElementById('paidPostId').value = '';
+            }
+        }
+
+        // 从帖子详情页直接设置付费（管理员快捷操作）
+        async function doSetPaidPostFromDetail(postId) {
+            if (!confirm(`确定将此帖子设为付费内容吗？`)) return;
+            const res = await request(`/account/protected/paid-post/${postId}`, 'POST');
+            if (res) {
+                showToast('已设为付费帖子', 'success');
+                loadPostDetail(); // 刷新
             }
         }
 

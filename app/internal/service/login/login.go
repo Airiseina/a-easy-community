@@ -60,6 +60,7 @@ type UserProfileDTO struct {
 	Introduction string        `json:"introduction"`
 	Avatar       string        `json:"avatar"`
 	Role         int           `json:"role"`
+	Vip          bool          `json:"vip"`
 	IsMuted      bool          `json:"isMuted"`
 	Posts        []UserPostDTO `json:"posts"`
 }
@@ -92,6 +93,7 @@ func GetProfile(account string) (UserProfileDTO, error) {
 		Introduction: user.UserProfile.Introduction,
 		Avatar:       user.UserProfile.Avatar,
 		Role:         user.Role,
+		Vip:          user.Vip,
 		IsMuted:      user.UserProfile.IsMuted,
 		Posts:        userPostDTO,
 	}
@@ -169,15 +171,32 @@ func ChangeName(account string, newName string) (error, bool) {
 	if err != nil {
 		return err, false
 	}
-	return nil, true
+	user, err := global.User.GetUserId(account)
+	if err != nil {
+		return err, false
+	}
+	return global.UserRedis.DelUserCache(user.ID), true
 }
 
 func ChangeAvatar(account string, avatar string) error {
-	return global.User.ChangeAvatar(account, avatar)
+	err := global.User.ChangeAvatar(account, avatar)
+	if err != nil {
+		return err
+	}
+	user, err := global.User.GetUserId(account)
+	if err != nil {
+		return err
+	}
+	return global.UserRedis.DelUserCache(user.ID)
 }
 
 func ChangeIntroduction(account string, introduction string) error {
-	return global.User.ChangeIntroduction(account, introduction)
+	err := global.User.ChangeIntroduction(account, introduction)
+	user, err := global.User.GetUserId(account)
+	if err != nil {
+		return err
+	}
+	return global.UserRedis.DelUserCache(user.ID)
 }
 
 func GetUserRole(account string) (int, error) {
@@ -202,7 +221,7 @@ func Muted(userId uint, role int, isMuted bool) (error, bool) {
 		if err != nil {
 			return err, false
 		}
-		return nil, true
+		return global.UserRedis.DelUserCache(userId), true
 	}
 	return nil, false
 }

@@ -12,6 +12,7 @@ type User struct {
 	Account     string      `gorm:"type:varchar(100);uniqueIndex;not null"`
 	Hash        string      `gorm:"not null"`
 	Role        int         `gorm:"type:tinyint;default:0;comment:角色 0:普通用户 1:管理员"`
+	Vip         bool        `gorm:"default:false;comment:是否为vip用户"`
 	Followings  []*User     `gorm:"many2many:user_relations;joinForeignKey:follower_id;joinReferences:followed_id"`
 	Followers   []*User     `gorm:"many2many:user_relations;joinForeignKey:followed_id;joinReferences:follower_id"`
 	UserProfile UserProfile `gorm:"foreignKey:UserID" json:"user_profile"`

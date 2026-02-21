@@ -80,6 +80,10 @@ func GetPostList(c *gin.Context) {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
 	}
+	if len(posts) == 0 {
+		response.FailWithMessage(c, "该页没有对应数据")
+		return
+	}
 	response.OkWithData(c, posts)
 }
 
@@ -95,6 +99,10 @@ func GetPostDetail(c *gin.Context) {
 	post, err := controller.GetPostDetail(account, postIdInt)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if post.PostID == 0 {
+		response.FailWithMessage(c, "未找到该文章")
 		return
 	}
 	response.OkWithData(c, post)
@@ -138,7 +146,11 @@ func GetUserProfile(c *gin.Context) {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
 	}
-	response.OkWithData(c, *user)
+	if user.Account == "" {
+		response.FailWithMessage(c, "未找到该用户")
+		return
+	}
+	response.OkWithData(c, user)
 }
 
 func DeletePost(c *gin.Context) {
@@ -234,4 +246,91 @@ func GetHotRank(c *gin.Context) {
 		}
 	}
 	response.OkWithData(c, hotPosts)
+}
+
+func SearchPosts(c *gin.Context) {
+	keyword := c.Query("keyword")
+	if keyword == "" {
+		response.FailWithMessage(c, "搜索关键词不能为空")
+		return
+	}
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		zlog.Warn("请求出错了")
+		response.FailWithCode(c, response.INVALID_PARAMS, response.GetMsg(response.INVALID_PARAMS))
+		return
+	}
+	pageSize := 10
+	offset := (page - 1) * pageSize
+	posts, err := controller.SearchPosts(keyword, offset, pageSize)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if len(posts) == 0 {
+		response.OkWithData(c, "暂无相关内容")
+		return
+	}
+	response.OkWithData(c, posts)
+}
+
+func SetPostPaid(c *gin.Context) {
+	postId, err := strconv.ParseUint(c.Param("postId"), 10, 64)
+	if err != nil {
+		zlog.Error("转换失败")
+		response.Fail(c)
+	}
+	postIdInt := uint(postId)
+	role := c.MustGet("role").(int)
+	flag, err := controller.SetPostPaid(role, postIdInt)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if !flag {
+		response.FailWithMessage(c, "你暂无该权限")
+		return
+	}
+	response.Ok(c)
+}
+
+func SetVip(c *gin.Context) {
+	i, err := strconv.ParseUint(c.Param("Id"), 10, 64)
+	if err != nil {
+		zlog.Error("转换失败")
+		response.Fail(c)
+	}
+	id := uint(i)
+	role := c.MustGet("role").(int)
+	flag, err := controller.PayVip(role, id)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if !flag {
+		response.FailWithMessage(c, "暂无权限")
+		return
+	}
+	response.Ok(c)
+}
+
+func AiSummary(c *gin.Context) {
+	postId, err := strconv.ParseUint(c.Param("postId"), 10, 64)
+	if err != nil {
+		zlog.Error("转换失败")
+		response.Fail(c)
+		return
+	}
+	postIdInt := uint(postId)
+	account := c.GetString("account")
+	postSummary, err := controller.AiSummary(account, postIdInt)
+	if err != nil {
+		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
+		return
+	}
+	if postSummary == "" {
+		response.FailWithMessage(c, "请解锁会员使用")
+		return
+	}
+	response.OkWithData(c, gin.H{"postSummary": postSummary})
 }
