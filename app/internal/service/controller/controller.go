@@ -218,6 +218,13 @@ func GetPostDetail(account string, postId uint) (PostDTO, error) {
 }
 
 func AiSummary(account string, postId uint) (string, error) {
+	summary, err := global.PostRedis.GetSummaryCache(postId)
+	if err != nil {
+		return "", err
+	}
+	if summary != "" {
+		return summary, nil
+	}
 	val, err, _ := requestGroup.Do(fmt.Sprintf("post:%d", postId), func() (interface{}, error) {
 		user, err := global.User.GetUserId(account)
 		p, err := global.Post.GetPostDetail(postId)
@@ -226,6 +233,10 @@ func AiSummary(account string, postId uint) (string, error) {
 		}
 		if user.Vip {
 			content, err := ai.AutoSummary(p.Content)
+			if err != nil {
+				return "", err
+			}
+			err = global.PostRedis.SetSummaryCache(postId, content)
 			if err != nil {
 				return "", err
 			}

@@ -42,4 +42,6 @@ type PostRedis interface {
 	GetPostListCache(offset, pageSize int) (string, error)
 	SetFollowingPostsCache(account string, offset, pageSize int, posts interface{}) error
 	GetFollowingPostsCache(account string, offset, pageSize int) (string, error)
+	SetSummaryCache(postId uint, summary string) error
+	GetSummaryCache(postId uint) (string, error)
 }

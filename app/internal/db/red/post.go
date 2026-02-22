@@ -224,3 +224,25 @@ func (rdb Redis) GetFollowingPostsCache(account string, offset, pageSize int) (s
 	}
 	return data, nil
 }
+
+func (rdb Redis) SetSummaryCache(postId uint, summary string) error {
+	key := fmt.Sprintf("post:summary:%d", postId)
+	err := rdb.redis.Set(rdb.context, key, summary, 6*time.Hour+utils.RandomDuration(5)).Err()
+	if err != nil {
+		zlog.Error("建立总结缓存失败", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (rdb Redis) GetSummaryCache(postId uint) (string, error) {
+	key := fmt.Sprintf("post:summary:%d", postId)
+	data, err := rdb.redis.Get(rdb.context, key).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", nil
+		}
+		return "", err
+	}
+	return data, nil
+}
