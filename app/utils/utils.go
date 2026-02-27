@@ -19,14 +19,16 @@ var jwtRefreshKey = viper.GetString("jwtRefreshKey")
 type MyClaims struct {
 	Account string `json:"account"`
 	Role    int    `json:"role"`
+	UserId  uint   `json:"userId"`
 	Type    string `json:"type"`
 	jwt.StandardClaims
 }
 
-func MakeToken(account string, role int) (string, string, error) {
+func MakeToken(account string, userId uint, role int) (string, string, error) {
 	claim := &MyClaims{
 		Account: account,
 		Role:    role,
+		UserId:  userId,
 		Type:    "access",
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Add(-5 * time.Second).Unix(),
@@ -43,6 +45,7 @@ func MakeToken(account string, role int) (string, string, error) {
 	newClaim := &MyClaims{
 		Account: account,
 		Role:    role,
+		UserId:  userId,
 		Type:    "refresh",
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Add(-5 * time.Second).Unix(),

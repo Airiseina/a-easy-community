@@ -6,5 +6,6 @@
         <function importPath="commmunity/app/internal/service/login" name="GetProfile" />
       </functions>
     </inspection_tool>
+    <inspection_tool class="SqlNoDataSourceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
   </profile>
 </component>

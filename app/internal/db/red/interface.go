@@ -45,3 +45,9 @@ type PostRedis interface {
 	SetSummaryCache(postId uint, summary string) error
 	GetSummaryCache(postId uint) (string, error)
 }
+
+type MessageRedis interface {
+	SetMessageCache(userId1 uint, userId2 uint, value interface{}, offset, pageSize int) error
+	GetMessageCache(userId1 uint, userId2 uint, offset int, pageSize int) (string, error)
+	DelMessageCache(userId1 uint, userId2 uint) error
+}

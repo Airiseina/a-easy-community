@@ -9,7 +9,7 @@ community like zhihu
 - **语言**: Go (1.25)
 - **Web 框架**: Gin 
 - **数据库**: MySQL 8.0
-- **缓存**: Redi
+- **缓存**: Redis
 - **ORM**: GORM
 - **配置**: Viper
 - **日志**: Zap + Lumberjack (归档)
@@ -178,6 +178,8 @@ community like zhihu
 
 - 借用了ai之力
 
+### 测试前端
 
+- ai生成前端，apipost上的测试接口被删了
 
 (该文档在ai的基础上修改)

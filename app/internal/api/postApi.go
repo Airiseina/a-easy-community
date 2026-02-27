@@ -203,7 +203,8 @@ func ToggleLike(c *gin.Context) {
 	}
 	postIdInt := uint(postId)
 	account := c.GetString("account")
-	isLike, count, err := controller.ToggleLike(postIdInt, account)
+	userId := c.MustGet("userId").(uint)
+	isLike, count, err := controller.ToggleLike(postIdInt, account, userId)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -213,6 +214,7 @@ func ToggleLike(c *gin.Context) {
 
 func GetFollowingPost(c *gin.Context) {
 	account := c.GetString("account")
+	userId := c.MustGet("userId").(uint)
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil {
 		zlog.Warn("请求出错了")
@@ -221,7 +223,7 @@ func GetFollowingPost(c *gin.Context) {
 	}
 	pageSize := 10
 	offset := (page - 1) * pageSize
-	posts, err := feed.GetFollowingPosts(account, offset, pageSize)
+	posts, err := feed.GetFollowingPosts(account, userId, offset, pageSize)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return

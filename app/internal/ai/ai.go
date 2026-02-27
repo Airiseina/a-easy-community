@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	API_KEY = "43f29e6afa964c199fbde7a6d7b57794.768b8xPe3IMpGUB7"     //viper.GetString("api.key")
-	API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions" //viper.GetString("api.url")
-	MODEL   = "glm-4.7-flash"                                         //viper.GetString("api.model")
+	APIKEY = "43f29e6afa964c199fbde7a6d7b57794.768b8xPe3IMpGUB7"     //viper.GetString("api.key")
+	APIURL = "https://open.bigmodel.cn/api/paas/v4/chat/completions" //viper.GetString("api.url")
+	MODEL  = "glm-4.7-flash"                                         //viper.GetString("api.model")
 )
 
 type ChatRequest struct {
@@ -57,12 +57,12 @@ func AutoSummary(content string) (string, error) {
 		zlog.Error("JSON 编码失败", zap.Error(err))
 		return "", err
 	}
-	req, err := http.NewRequest("POST", API_URL, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", APIURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		zlog.Error("创建请求失败", zap.Error(err))
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer "+API_KEY)
+	req.Header.Set("Authorization", "Bearer "+APIKEY)
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{Timeout: 2 * time.Minute}
 	resp, err := client.Do(req)

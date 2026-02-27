@@ -3,6 +3,7 @@ package routes
 import (
 	"commmunity/app/internal/api"
 	"commmunity/app/internal/cron"
+	"commmunity/app/internal/ws"
 	"commmunity/app/middleware"
 	"context"
 	"time"
@@ -17,6 +18,7 @@ func Routes() {
 	cronViewManager.Start(context.Background(), cron.SyncView)
 	cronHotRankManager := cron.NewCronManager(5 * time.Hour)
 	cronHotRankManager.Start(context.Background(), cron.RefreshHot)
+	go ws.GlobalManager.Start()
 	r := gin.Default()
 	r.Use(middleware.CorsMiddleWare())
 	r.Static("/static", "./uploads")
@@ -61,6 +63,11 @@ func Routes() {
 		protected.GET("/following", api.GetFollowings)                                                                    // 我的关注列表
 		protected.GET("/follow", api.GetFollowers)                                                                        // 我的粉丝列表
 		protected.GET("/following_post", api.GetFollowingPost)                                                            // 关注人的动态
+	}
+	{
+		protected.GET("/websocket", ws.HandleWebSocket)
+		protected.GET("/messages/:Id", api.GetHistoryMessage) // 获取历史消息
+		protected.GET("/notices", api.GetNotice)              // 获取通知
 	}
 
 	r.Run(":8080")

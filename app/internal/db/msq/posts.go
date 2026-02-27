@@ -33,13 +33,13 @@ func (db Gorm) CreatePost(userID uint, title string, content string) error {
 
 func (db Gorm) GetPostList(offset int, pageSize int) ([]model.Post, error) {
 	var posts []model.Post
-	err := db.db.Preload("User"). //预加载用户信息后，文章信息只要id和标题和跟热度有关的，一个网页中仅给规定文章
-					Preload("User.UserProfile").
-					Select("id, user_id, title, created_at, view_count, like_count, comment_count").
-					Order("created_at desc").
-					Offset(offset).
-					Limit(pageSize).
-					Find(&posts).Error
+	err := db.db.Preload("User").
+		Preload("User.UserProfile").
+		Select("id, user_id, title, created_at, view_count, like_count, comment_count").
+		Order("created_at desc").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&posts).Error
 	if err != nil {
 		zlog.Error("论坛生成失败", zap.Error(err))
 		return nil, err
@@ -97,6 +97,10 @@ func (db Gorm) GetUserProfile(userID uint) (model.User, error) {
 	var user model.User
 	err := db.db.Preload("UserProfile").Preload("Posts").First(&user, userID).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			zlog.Warn("用户未找到", zap.Uint("userID", userID))
+			return model.User{}, nil
+		}
 		zlog.Error("查找失败", zap.Error(err))
 		return model.User{}, err
 	}
@@ -236,4 +240,14 @@ func (db Gorm) SetPostPaid(postId uint, isPaid bool) error {
 		return err
 	}
 	return nil
+}
+
+func (db Gorm) GetPoster(postId uint) (uint, error) {
+	var post model.Post
+	err := db.db.Where("id = ?", postId).First(&post).Error
+	if err != nil {
+		zlog.Error("查找作者失败", zap.Error(err))
+		return 0, err
+	}
+	return post.UserID, nil
 }

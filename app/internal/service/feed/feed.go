@@ -5,12 +5,7 @@ import (
 	"encoding/json"
 )
 
-func Follow(account string, followedId uint) (error, bool) {
-	follower, err := global.User.GetUserId(account)
-	if err != nil {
-		return err, false
-	}
-	followerId := follower.ID
+func Follow(account string, followerId uint, followedId uint) (error, bool) {
 	flag, err := global.User.IsFollowing(followedId, followerId)
 	if err != nil {
 		return err, false
@@ -45,7 +40,7 @@ type FollowsDTO struct {
 	Introduction string `json:"introduction"`
 }
 
-func GetFollowers(account string) ([]FollowsDTO, error) {
+func GetFollowers(account string, userId uint) ([]FollowsDTO, error) {
 	fc, err := global.UserRedis.GetFollowersCache(account)
 	if err != nil {
 		return nil, err
@@ -60,11 +55,7 @@ func GetFollowers(account string) ([]FollowsDTO, error) {
 		}
 	}
 	var followersDTO []FollowsDTO
-	user, err := global.User.GetUserId(account)
-	if err != nil {
-		return nil, err
-	}
-	followers, err := global.User.GetFollowers(user.ID)
+	followers, err := global.User.GetFollowers(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +82,7 @@ func GetFollowers(account string) ([]FollowsDTO, error) {
 	return followersDTO, nil
 }
 
-func GetFollowings(account string) ([]FollowsDTO, error) {
+func GetFollowings(account string, userId uint) ([]FollowsDTO, error) {
 	fc, err := global.UserRedis.GetFollowingsCache(account)
 	if err != nil {
 		return nil, err
@@ -106,11 +97,7 @@ func GetFollowings(account string) ([]FollowsDTO, error) {
 		}
 	}
 	var followingsDTO []FollowsDTO
-	user, err := global.User.GetUserId(account)
-	if err != nil {
-		return nil, err
-	}
-	followings, err := global.User.GetFollowings(user.ID)
+	followings, err := global.User.GetFollowings(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +136,7 @@ type PostsDTO struct {
 	CommentCount uint   `json:"comment_count"`
 }
 
-func GetFollowingPosts(account string, offset int, pageSize int) ([]PostsDTO, error) {
+func GetFollowingPosts(account string, userId uint, offset int, pageSize int) ([]PostsDTO, error) {
 	fpc, err := global.PostRedis.GetFollowingPostsCache(account, offset, pageSize)
 	if err != nil {
 		return nil, err
@@ -163,11 +150,7 @@ func GetFollowingPosts(account string, offset int, pageSize int) ([]PostsDTO, er
 			return cached, nil
 		}
 	}
-	user, err := global.User.GetUserId(account)
-	if err != nil {
-		return nil, err
-	}
-	ps, err := global.Post.GetFollowingPosts(user.ID, offset, pageSize)
+	ps, err := global.Post.GetFollowingPosts(userId, offset, pageSize)
 	if err != nil {
 		return nil, err
 	}

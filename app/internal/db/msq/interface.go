@@ -40,4 +40,13 @@ type PostData interface {
 	HotPosts(postIds []uint) ([]model.Post, error)
 	SearchPosts(keyword string, offset, pageSize int) ([]model.Post, error)
 	SetPostPaid(postId uint, isPaid bool) error
+	GetPoster(postId uint) (uint, error)
+}
+
+type MessageData interface {
+	SaveMessage(formUserId uint, toUserId uint, content string, tp int)
+	GetHistoryMessage(userId1 uint, userId2 uint, offset int, limit int) ([]model.Message, error)
+	SaveNotice(userId uint, senderId uint, typ int, content string, postId uint)
+	GetUnreadNotices(userID uint, offset int, limit int) ([]model.Notice, error)
+	ReadAllNotices(userID uint) error
 }

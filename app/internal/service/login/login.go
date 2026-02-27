@@ -162,7 +162,7 @@ func ChangePassword(account string, firstPassword string, secondPassword string)
 
 // 一天仅能修改5次
 
-func ChangeName(account string, newName string) (error, bool) {
+func ChangeName(account string, newName string, userId uint) (error, bool) {
 	if newName == "" {
 		zlog.Warn("修改用户名不能为空")
 		return nil, false
@@ -171,41 +171,33 @@ func ChangeName(account string, newName string) (error, bool) {
 	if err != nil {
 		return err, false
 	}
-	user, err := global.User.GetUserId(account)
-	if err != nil {
-		return err, false
-	}
-	return global.UserRedis.DelUserCache(user.ID), true
+	return global.UserRedis.DelUserCache(userId), true
 }
 
-func ChangeAvatar(account string, avatar string) error {
+func ChangeAvatar(account string, avatar string, userId uint) error {
 	err := global.User.ChangeAvatar(account, avatar)
 	if err != nil {
 		return err
 	}
-	user, err := global.User.GetUserId(account)
-	if err != nil {
-		return err
-	}
-	return global.UserRedis.DelUserCache(user.ID)
+	return global.UserRedis.DelUserCache(userId)
 }
 
-func ChangeIntroduction(account string, introduction string) error {
+func ChangeIntroduction(account string, introduction string, userId uint) error {
 	err := global.User.ChangeIntroduction(account, introduction)
-	user, err := global.User.GetUserId(account)
 	if err != nil {
 		return err
 	}
-	return global.UserRedis.DelUserCache(user.ID)
+	return global.UserRedis.DelUserCache(userId)
 }
 
-func GetUserRole(account string) (int, error) {
+func GetUserRole(account string) (int, uint, error) {
 	user, err := global.User.GetUser(account)
 	if user == nil || err != nil {
-		return 0, err
+		return 0, 0, err
 	}
+	id := user.ID
 	role := user.Role
-	return role, nil
+	return role, id, nil
 }
 
 func IsTokenValid(tokenStr string) bool {

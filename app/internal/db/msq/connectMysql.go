@@ -35,12 +35,11 @@ func ConnectMysql() *gorm.DB {
 	if err != nil {
 		zlog.Fatal("数据库连接失败", zap.Error(err))
 	}
-	err = db.AutoMigrate(&model.User{}, &model.UserProfile{}, &model.Post{}, &model.Comment{})
+	err = db.AutoMigrate(&model.User{}, &model.UserProfile{}, &model.Post{}, &model.Comment{}, &model.Message{}, &model.Notice{})
 	if err != nil {
 		zlog.Fatal("自动迁移失败", zap.Error(err))
 	}
 	zlog.Info("自动迁移成功")
-
 	if !db.Migrator().HasIndex(&model.Post{}, "idx_fulltext_search") {
 		err = db.Exec("ALTER TABLE posts ADD FULLTEXT INDEX idx_fulltext_search (title, content) WITH PARSER ngram").Error
 		if err != nil {

@@ -62,12 +62,12 @@ func Login(c *gin.Context) {
 		response.FailWithCode(c, response.ERROR_USER_NOT_EXIST_OR_PASSWORD_WRONG, response.GetMsg(response.ERROR_USER_NOT_EXIST_OR_PASSWORD_WRONG))
 		return
 	}
-	role, err := login.GetUserRole(user.Account)
+	role, userId, err := login.GetUserRole(user.Account)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
 	}
-	token, refreshToken, err := utils.MakeToken(user.Account, role)
+	token, refreshToken, err := utils.MakeToken(user.Account, userId, role)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -172,7 +172,8 @@ func ChangeUserName(c *gin.Context) {
 		return
 	}
 	user.Account = c.GetString("account")
-	err, flag1 := login.ChangeName(user.Account, user.Name)
+	userId := c.MustGet("userId").(uint)
+	err, flag1 := login.ChangeName(user.Account, user.Name, userId)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -193,6 +194,7 @@ func ChangeAvatar(c *gin.Context) {
 	}
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	account := c.GetString("account")
+	userId := c.MustGet("userId").(uint)
 	newFileName := fmt.Sprintf("%s_%d%s", account, time.Now().Unix(), ext)
 	err = os.MkdirAll("./uploads/avatars", 0755)
 	if err != nil {
@@ -207,7 +209,7 @@ func ChangeAvatar(c *gin.Context) {
 		return
 	}
 	accessURL := "/static/avatars/" + newFileName
-	err = login.ChangeAvatar(account, accessURL)
+	err = login.ChangeAvatar(account, accessURL, userId)
 	if err != nil {
 		response.FailWithMessage(c, "头像上传失败")
 		return
@@ -223,7 +225,8 @@ func ChangeIntroduction(c *gin.Context) {
 		return
 	}
 	user.Account = c.GetString("account")
-	err := login.ChangeIntroduction(user.Account, user.Introduction)
+	userId := c.MustGet("userId").(uint)
+	err := login.ChangeIntroduction(user.Account, user.Introduction, userId)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -259,13 +262,14 @@ func Muted(c *gin.Context) {
 
 func Follow(c *gin.Context) {
 	account := c.GetString("account")
+	followerId := c.MustGet("userId").(uint)
 	id, err := strconv.ParseUint(c.Param("Id"), 10, 64)
 	if err != nil {
 		zlog.Error("转换失败")
 		response.Fail(c)
 	}
-	followerId := uint(id)
-	err, isFollow := feed.Follow(account, followerId)
+	followedId := uint(id)
+	err, isFollow := feed.Follow(account, followerId, followedId)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -275,7 +279,8 @@ func Follow(c *gin.Context) {
 
 func GetFollowers(c *gin.Context) {
 	account := c.GetString("account")
-	followers, err := feed.GetFollowers(account)
+	userId := c.MustGet("userId").(uint)
+	followers, err := feed.GetFollowers(account, userId)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -289,7 +294,8 @@ func GetFollowers(c *gin.Context) {
 
 func GetFollowings(c *gin.Context) {
 	account := c.GetString("account")
-	followings, err := feed.GetFollowings(account)
+	userId := c.MustGet("userId").(uint)
+	followings, err := feed.GetFollowings(account, userId)
 	if err != nil {
 		response.FailWithCode(c, response.INTERNAL_ERROR, response.GetMsg(response.INTERNAL_ERROR))
 		return
@@ -316,6 +322,6 @@ func RefreshToken(c *gin.Context) {
 		response.FailWithMessage(c, "请重新登录")
 		return
 	}
-	newAccessToken, _, err := utils.MakeToken(claims.Account, claims.Role)
+	newAccessToken, _, err := utils.MakeToken(claims.Account, claims.UserId, claims.Role)
 	response.OkWithData(c, gin.H{"access_token": newAccessToken})
 }

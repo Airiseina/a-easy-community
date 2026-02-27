@@ -4,6 +4,7 @@ import (
 	"commmunity/app/internal/ai"
 	"commmunity/app/internal/db/global"
 	"commmunity/app/internal/model"
+	"commmunity/app/internal/ws"
 	"commmunity/app/utils"
 	"commmunity/app/zlog"
 	"context"
@@ -80,6 +81,7 @@ func GetPostList(offset int, pageSize int) ([]PostsDTO, error) {
 			if err != nil {
 				return nil, err
 			}
+			return []PostsDTO{}, nil
 		}
 		err = global.PostRedis.SetPostListCache(offset, pageSize, posts)
 		if err != nil {
@@ -258,10 +260,15 @@ func CreateComment(account string, postID uint, content string) (error, bool) {
 	if user.UserProfile.IsMuted {
 		return nil, false
 	}
-	cleanContent := bluemonday.UGCPolicy().Sanitize(content)
+	posterId, err := global.Post.GetPoster(postID)
+	if err != nil {
+		return err, false
+	}
+	cleanContent := bluemonday.UGCPolicy().Sanitize(content) //防xss
 	if err = global.Post.CreateComment(user.ID, postID, cleanContent); err != nil {
 		return err, false
 	}
+	ws.SendNotice(posterId, 2, user.ID, postID, cleanContent)
 	return global.PostRedis.DelPostCache(postID), true
 }
 
@@ -384,7 +391,7 @@ func DeleteComment(account string, commentID uint, role int) (error, bool) {
 	return nil, false
 }
 
-func ToggleLike(postId uint, account string) (bool, int, error) {
+func ToggleLike(postId uint, account string, userId uint) (bool, int, error) {
 	key := fmt.Sprintf("post:likes:%d", postId)
 	isLike, err := global.PostRedis.IsLike(key, account)
 	if err != nil {
@@ -402,6 +409,11 @@ func ToggleLike(postId uint, account string) (bool, int, error) {
 			return false, 0, err
 		}
 		isLike = true
+		poster, err := global.Post.GetPoster(postId)
+		if err != nil {
+			return false, 0, err
+		}
+		ws.SendNotice(poster, 1, userId, postId, "有人给你点赞")
 	}
 	c, err := global.PostRedis.LikeCount(key)
 	if err != nil {
@@ -446,7 +458,7 @@ func GetHotRank() ([]PostsDTO, map[uint]float64, error) {
 		postIds = append(postIds, postId)
 		score[postId] = z.Score
 	}
-	val, err, _ := requestGroup.Do(fmt.Sprintf("post:hotList"), func() (interface{}, error) {
+	val, err, _ := requestGroup.Do("post:hotList", func() (interface{}, error) {
 		ps, err := global.Post.HotPosts(postIds)
 		if err != nil {
 			return nil, err
