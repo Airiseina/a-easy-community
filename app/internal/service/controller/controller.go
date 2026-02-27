@@ -502,7 +502,11 @@ func SearchPosts(keyword string, offset int, pageSize int) ([]PostsDTO, error) {
 
 func SetPostPaid(role int, postId uint) (bool, error) {
 	if role == model.RoleAdmin {
-		return true, global.Post.SetPostPaid(postId, true)
+		err := global.Post.SetPostPaid(postId, true)
+		if err != nil {
+			return false, err
+		}
+		return true, global.PostRedis.DelPostCache(postId)
 	}
 	return false, nil
 }

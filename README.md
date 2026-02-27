@@ -19,7 +19,7 @@ community like zhihu
 - **UUID** : 生成唯一标识符
 - **HTML过滤**：防止XSS攻击，用于净化用户输入
 - **防csrf**：`c.SetSameSite(http.SameSiteStrictMode)`确保refreshcookie不会在其他网站调用
-- **websocket**：（目前还未实现）
+- **websocket**：实现站内通知和私信
 
 ## 认证方式
 
