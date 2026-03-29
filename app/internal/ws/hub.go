@@ -29,7 +29,7 @@ type ChatData struct {
 }
 
 type NoticeData struct {
-	Type      int    `json:"type"` // 1点赞 2评论 3系统
+	Type      int    `json:"type"` // 1点赞 2评论
 	SenderId  uint   `json:"sender_id"`
 	Content   string `json:"content"`
 	PostId    uint   `json:"post_id"`

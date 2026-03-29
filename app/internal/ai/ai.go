@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	APIKEY = "43f29e6afa964c199fbde7a6d7b57794.768b8xPe3IMpGUB7"     //viper.GetString("api.key")
+	APIKEY = "************************************"                  //viper.GetString("api.key")
 	APIURL = "https://open.bigmodel.cn/api/paas/v4/chat/completions" //viper.GetString("api.url")
 	MODEL  = "glm-4.7-flash"                                         //viper.GetString("api.model")
 )

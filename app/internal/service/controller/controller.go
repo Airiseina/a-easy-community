@@ -112,7 +112,7 @@ type CommentDTO struct {
 	UserId     uint   `json:"user_id"`
 }
 
-func GetPostDetail(account string, postId uint) (PostDTO, error) {
+func GetPostDetail(account string, postId uint) (PostDTO, error) { //vip有问题
 	pc, err := global.PostRedis.GetPostCache(postId)
 	if err != nil {
 		return PostDTO{}, err
